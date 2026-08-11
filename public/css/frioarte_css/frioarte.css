@@ -1,0 +1,513 @@
+/*
+ * Estrutura fixa: cabeçalho, menu, hero, rodapé e barra de ação.
+ *
+ * O cabeçalho é uma camada flutuante — o conteúdo passa por baixo dele, e ele
+ * só se materializa quando existe algo passando. Sobre o hero ele é invisível.
+ */
+
+/* ---------- Cabeçalho ---------- */
+
+.chrome {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 60;
+}
+
+/*
+ * Duas camadas independentes, porque `backdrop-filter` não interpola a partir
+ * de `none`: a névoa do topo garante a leitura da logo sobre a foto clara do
+ * hero; o material entra depois, quando a página começa a rolar.
+ */
+.chrome::before,
+.chrome::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: opacity 320ms ease;
+}
+
+.chrome::before {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.72), transparent);
+    height: 7rem;
+    inset-block-end: auto;
+}
+
+.chrome::after {
+    background: var(--vidro);
+    backdrop-filter: var(--desfoque-chrome);
+    -webkit-backdrop-filter: var(--desfoque-chrome);
+    /* A borda de baixo é um degradê, não um risco de 1px. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+    opacity: 0;
+}
+
+.chrome[data-rolado='true']::before {
+    opacity: 0;
+}
+
+.chrome[data-rolado='true']::after {
+    opacity: 1;
+}
+
+.chrome__interno {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--e-5);
+    height: var(--altura-chrome);
+}
+
+/*
+ * A logo é o lockup completo (floco + "FRIO ARTE / AR CONDICIONADO"): não há
+ * texto ao lado, porque repetir o nome seria dizer a mesma coisa duas vezes.
+ */
+.marca {
+    display: flex;
+    align-items: center;
+    margin-inline-end: auto;
+}
+
+.marca__logo {
+    height: 1.625rem;
+    width: auto;
+    flex: none;
+}
+
+.chrome__nav {
+    display: none;
+    gap: var(--e-6);
+    font-size: var(--t-pequeno);
+    font-weight: 500;
+    letter-spacing: -0.004em;
+    color: var(--tinta-media);
+}
+
+.chrome__nav a {
+    position: relative;
+    padding-block: var(--e-2);
+    transition: color 200ms ease;
+}
+
+.chrome__nav a:hover {
+    color: var(--tinta);
+}
+
+/* Onde estou: um fio de 1px sob o item, não uma pílula colorida. */
+.chrome__nav a::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0.125rem 0;
+    height: 1px;
+    background: var(--acento);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 320ms var(--curva-saida);
+}
+
+.chrome__nav a[data-atual='true'] {
+    color: var(--tinta);
+}
+
+.chrome__nav a[data-atual='true']::after {
+    transform: scaleX(1);
+}
+
+.chrome__acao {
+    display: none;
+}
+
+.chrome__menu {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-inline-end: -0.625rem;
+    border-radius: var(--r-pilula);
+    color: var(--tinta);
+    transform: scale(1);
+    transition: transform 130ms var(--curva-saida);
+}
+
+.chrome__menu[data-pressionado='true'] {
+    transform: scale(0.92);
+}
+
+.chrome__menu svg {
+    width: 1.375rem;
+    height: 1.375rem;
+}
+
+@media (min-width: 60rem) {
+    .chrome__nav,
+    .chrome__acao {
+        display: flex;
+    }
+
+    .chrome__menu {
+        display: none;
+    }
+
+    .marca {
+        margin-inline-end: var(--e-8);
+    }
+
+    .chrome__nav {
+        margin-inline-end: auto;
+    }
+}
+
+/* ---------- Menu do celular ----------
+   Entra e sai pelo mesmo caminho (por cima), ancorado ao cabeçalho. */
+
+.menu {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    visibility: hidden;
+    /* A visibilidade só volta a `hidden` depois que o painel terminou de subir. */
+    transition: visibility 0s linear 340ms;
+}
+
+.menu[data-aberto='true'] {
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+.menu__veu {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 11, 14, 0.4);
+    opacity: 0;
+    transition: opacity 300ms var(--curva-entrada);
+}
+
+.menu[data-aberto='true'] .menu__veu {
+    opacity: 1;
+    transition-timing-function: var(--curva-saida);
+}
+
+.menu__painel {
+    position: absolute;
+    inset: 0 0 auto 0;
+    padding: calc(var(--altura-chrome) + var(--e-6)) var(--goteira) var(--e-7);
+    background: var(--branco);
+    border-radius: 0 0 var(--r-3) var(--r-3);
+    transform: translate3d(0, -100%, 0);
+    transition: transform 340ms var(--curva-entrada);
+}
+
+.menu[data-aberto='true'] .menu__painel {
+    transform: translate3d(0, 0, 0);
+    transition-timing-function: var(--curva-saida);
+}
+
+.menu__lista {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 var(--e-6);
+    padding: 0;
+    list-style: none;
+}
+
+.menu__lista a {
+    display: block;
+    padding: var(--e-3) 0;
+    font-family: var(--fonte-display);
+    font-size: 1.75rem;
+    font-weight: 650;
+    letter-spacing: -0.028em;
+    border-bottom: 1px solid var(--fio);
+}
+
+.menu__painel .botao {
+    width: 100%;
+}
+
+@media (min-width: 60rem) {
+    .menu {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu {
+        transition-delay: 200ms;
+    }
+
+    .menu__painel {
+        transform: none;
+        opacity: 0;
+        transition: opacity 200ms ease;
+    }
+
+    .menu[data-aberto='true'] .menu__painel {
+        opacity: 1;
+    }
+}
+
+/* ---------- Hero ----------
+   Cena 01. A fotografia ocupa a viewport inteira e a tipografia vive dentro
+   dela — não ao lado. Uma frase, um apoio curto, duas ações. Nada mais. */
+
+.hero {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 100svh;
+    padding-top: calc(var(--altura-chrome) + var(--e-6));
+    padding-bottom: var(--e-6);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/*
+ * Duas camadas de imagem empilhadas: a fotografia (quando existe) por cima do
+ * campo construído em CSS. Sem foto, o campo é a cena — nunca uma imagem
+ * quebrada nem um retângulo cinza.
+ */
+.hero__midia {
+    position: absolute;
+    inset: -2vh 0;
+    z-index: -3;
+    background-image: var(--hero-imagem), var(--hero-campo);
+    background-size: cover, cover;
+    background-position: var(--hero-foco, 62% 50%), center;
+    background-repeat: no-repeat;
+    /* Parallax curtíssimo: a cena anda menos que a página, sem chamar atenção. */
+    transform: translate3d(0, calc(var(--p, 0) * 4vh), 0);
+    will-change: transform;
+}
+
+
+/*
+ * Véu de leitura. A foto é clara, então o véu também é: escurecer uma cena
+ * luminosa para caber texto escuro seria brigar com a própria direção.
+ * Forte onde o texto começa, inexistente onde a imagem precisa aparecer.
+ */
+.hero__veu {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0) 55%,
+            rgba(255, 255, 255, 0.86) 88%,
+            var(--branco) 100%
+        ),
+        linear-gradient(
+            105deg,
+            rgba(255, 255, 255, 0.94) 0%,
+            rgba(255, 255, 255, 0.8) 26%,
+            rgba(255, 255, 255, 0.28) 52%,
+            rgba(255, 255, 255, 0) 72%
+        );
+}
+
+.hero__interno {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: var(--e-5);
+}
+
+.hero__titulo {
+    max-width: 13ch;
+}
+
+.hero__apoio {
+    max-width: 42ch;
+    color: var(--tinta-media);
+}
+
+.hero__acoes {
+    margin-top: var(--e-2);
+}
+
+/* Linha de confiança no pé da cena: fatos, em voz baixa. */
+.hero__pe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-3) var(--e-6);
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--fio);
+    font-size: var(--t-pequeno);
+    color: var(--tinta-media);
+}
+
+.hero__regiao {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-2);
+}
+
+@media (max-width: 47.99rem) {
+    /*
+     * No celular a composição muda de eixo: a foto respira em cima, o texto
+     * assenta embaixo sobre a área clareada. Não é o desktop comprimido.
+     */
+    .hero {
+        min-height: 92svh;
+        --hero-foco: 58% 38%;
+        /* Recorte próprio para retrato: o desktop cortado não serve. */
+        --hero-imagem: var(--hero-imagem-alto);
+    }
+
+    .hero__veu {
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.55) 0%,
+            rgba(255, 255, 255, 0.18) 22%,
+            rgba(255, 255, 255, 0.82) 52%,
+            rgba(255, 255, 255, 0.97) 70%,
+            var(--branco) 100%
+        );
+    }
+
+    .hero__titulo {
+        max-width: 11ch;
+        /* No retrato o título ganha corpo: é ele que segura a primeira tela. */
+        font-size: clamp(3.125rem, 13vw, 4.5rem);
+    }
+
+    .hero__acoes .botao {
+        flex: 1 1 auto;
+    }
+
+    .hero__pe {
+        gap: var(--e-2) var(--e-5);
+    }
+}
+
+/* Telas muito baixas em paisagem: o hero não pode virar uma faixa esmagada. */
+@media (max-height: 34rem) and (orientation: landscape) {
+    .hero {
+        min-height: auto;
+        padding-block: calc(var(--altura-chrome) + var(--e-6)) var(--e-7);
+    }
+}
+
+/* ---------- Rodapé ----------
+   Última cena, não sobra de conteúdo. */
+
+.rodape {
+    background: var(--nevoa);
+    padding-block: var(--e-9) var(--e-6);
+    color: var(--tinta-media);
+    font-size: var(--t-pequeno);
+}
+
+.rodape__grade {
+    display: grid;
+    gap: var(--e-7);
+    padding-bottom: var(--e-8);
+}
+
+@media (min-width: 48rem) {
+    .rodape__grade {
+        grid-template-columns: 1.6fr 1fr 1fr;
+        gap: var(--e-6);
+    }
+}
+
+.rodape__bloco {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--e-2);
+}
+
+.rodape__logo {
+    height: 2.125rem;
+    margin-bottom: var(--e-2);
+}
+
+.rodape__titulo {
+    font-size: var(--t-micro);
+    letter-spacing: var(--tr-micro);
+    text-transform: uppercase;
+    font-weight: 650;
+    color: var(--tinta-fraca);
+    margin: 0 0 var(--e-2);
+}
+
+.rodape a {
+    transition: color 200ms ease;
+}
+
+.rodape a:hover {
+    color: var(--tinta);
+}
+
+.rodape__base {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-3) var(--e-6);
+    justify-content: space-between;
+    padding-top: var(--e-5);
+    border-top: 1px solid var(--fio);
+    font-size: 0.8125rem;
+    color: var(--tinta-fraca);
+}
+
+/* ---------- Barra de ação no celular ----------
+   Ao alcance do polegar. Sai de cena quando o rodapé já traz as mesmas ações,
+   então nunca cobre conteúdo que a pessoa acabou de alcançar. */
+
+.barra-acao {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: flex;
+    gap: var(--e-2);
+    padding: var(--e-3) var(--goteira) calc(var(--e-3) + env(safe-area-inset-bottom));
+    background: var(--vidro);
+    backdrop-filter: var(--desfoque-chrome);
+    -webkit-backdrop-filter: var(--desfoque-chrome);
+    /* Aresta clara no topo: a luz batendo na quina do material. */
+    border-top: 1px solid var(--vidro-borda);
+    transform: translate3d(0, 0, 0);
+    transition: transform 340ms var(--curva-saida), opacity 340ms ease;
+}
+
+.barra-acao[data-oculta='true'] {
+    transform: translate3d(0, 130%, 0);
+    opacity: 0;
+    transition-timing-function: var(--curva-entrada);
+}
+
+.barra-acao .botao {
+    flex: 1;
+}
+
+/* Translúcido sobre translúcido derruba a legibilidade. */
+.barra-acao .botao--secundario {
+    background: var(--branco);
+}
+
+@media (min-width: 60rem) {
+    .barra-acao {
+        display: none;
+    }
+}
+
+@media (max-width: 59.99rem) {
+    .rodape {
+        padding-bottom: 6rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .barra-acao[data-oculta='true'] {
+        transform: none;
+    }
+
+    .hero__midia img {
+        transform: scale(1.06);
+    }
+}

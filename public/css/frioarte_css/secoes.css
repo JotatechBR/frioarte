@@ -1,0 +1,902 @@
+/*
+ * As cenas da home.
+ *
+ * Cada uma tem composição própria e um único elemento dominante. Repetir
+ * "rótulo + título + grade de cards" dez vezes é o que faz uma página parecer
+ * modelo comprado — aqui a variação vem de luz, escala e enquadramento:
+ *
+ *   01 hero .............. foto, viewport inteira        (claro)
+ *   02 declaração ........ tipografia, quase vazia       (claro)
+ *   03 serviços .......... foto fixa + lista editorial   (grafite)
+ *   04 públicos .......... duas fotos sangradas          (foto)
+ *   05 ambientes ......... galeria assimétrica           (névoa)
+ *   06 sobre ............. declaração + números          (claro)
+ *   07 qualidade ......... matriz de fios                (névoa)
+ *   08 depoimento ........ uma citação enorme            (claro)
+ *   09 marcas ............ uma linha, em voz baixa       (claro)
+ *   10 dúvidas ........... lista aberta                  (névoa)
+ *   11 chamada final ..... foto sangrada                 (foto)
+ *   12 contato ........... formulário sem caixa          (claro)
+ */
+
+/* ---------- 02 · Declaração ----------
+   A cena mais vazia da página. Uma frase ocupa metade da tela e o parágrafo
+   entra depois, deslocado, como legenda de página de revista. */
+
+.declaracao {
+    display: grid;
+    gap: var(--e-8);
+}
+
+.declaracao__frase {
+    max-width: 13ch;
+}
+
+.declaracao__nota {
+    max-width: 30rem;
+}
+
+@media (min-width: 60rem) {
+    .declaracao {
+        grid-template-columns: repeat(12, 1fr);
+        gap: var(--e-9) var(--e-6);
+        align-items: end;
+    }
+
+    .declaracao__cabeca {
+        grid-column: 1 / 9;
+    }
+
+    /* Deslocada para a direita e para baixo: o olho desce em diagonal. */
+    .declaracao__nota {
+        grid-column: 7 / 13;
+        padding-bottom: var(--e-2);
+    }
+}
+
+/* ---------- 03 · Serviços ----------
+   Foto fixa à esquerda que troca conforme o serviço em foco; lista editorial
+   numerada à direita. Sete cartões iguais diriam a mesma coisa sete vezes. */
+
+.servicos__grade {
+    display: grid;
+    gap: var(--e-7);
+}
+
+.servicos__visual {
+    aspect-ratio: 4 / 5;
+}
+
+/* As fotos ocupam o mesmo lugar e trocam por opacidade — nenhuma se move. */
+.servicos__foto {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.05);
+    transition: opacity 800ms var(--curva-cena), transform 1600ms var(--curva-cena);
+}
+
+.servicos__foto[data-ativo='true'] {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.servicos__lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--fio);
+}
+
+.servico {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    gap: var(--e-2) var(--e-3);
+    padding-block: var(--e-5);
+    border-bottom: 1px solid var(--fio);
+    /* Fora de foco o item continua legível: 0,72 mantém 4,6:1 no resumo. */
+    opacity: 0.72;
+    transition: opacity 600ms var(--curva-cena);
+}
+
+.servico[data-ativo='true'] {
+    opacity: 1;
+}
+
+.servico__numero {
+    font-size: var(--t-micro);
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    color: var(--tinta-fraca);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.55em;
+    transition: color 400ms ease;
+}
+
+.servico[data-ativo='true'] .servico__numero {
+    color: var(--acento);
+}
+
+.servico__nome {
+    grid-column: 2;
+}
+
+.servico__resumo {
+    grid-column: 2;
+    font-size: var(--t-corpo);
+    line-height: 1.6;
+    color: var(--tinta-media);
+    margin: 0;
+    max-width: 42ch;
+}
+
+@media (min-width: 60rem) {
+    .servicos__grade {
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+        gap: var(--e-10);
+        align-items: start;
+    }
+
+    .servicos__visual {
+        position: sticky;
+        top: calc(var(--altura-chrome) + var(--e-5));
+        aspect-ratio: 4 / 5;
+    }
+
+    .servico {
+        padding-block: var(--e-6);
+    }
+}
+
+/* No celular a foto fixa não tem para onde grudar: vira abertura da cena. */
+@media (max-width: 59.99rem) {
+    .servicos__visual {
+        aspect-ratio: 3 / 2;
+        margin-bottom: var(--e-3);
+    }
+}
+
+/*
+ * Sem nenhuma foto de serviço, a coluna da imagem não vira moldura vazia: ela
+ * some, e a lista se recompõe em duas colunas para ocupar a largura inteira.
+ * A cena muda de composição em vez de exibir um retângulo reservado.
+ */
+.servicos__grade[data-sem-foto='true'] .servicos__visual {
+    display: none;
+}
+
+@media (min-width: 60rem) {
+    .servicos__grade[data-sem-foto='true'] {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .servicos__grade[data-sem-foto='true'] .servico {
+        grid-template-columns: 3rem minmax(0, 1fr) minmax(0, 1.1fr);
+        align-items: baseline;
+        gap: var(--e-6);
+    }
+
+    .servicos__grade[data-sem-foto='true'] .servico__nome {
+        grid-column: 2;
+    }
+
+    .servicos__grade[data-sem-foto='true'] .servico__resumo {
+        grid-column: 3;
+        max-width: 46ch;
+    }
+}
+
+@media (prefers-contrast: more) {
+    .servico {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .servicos__foto {
+        transform: none;
+        transition: opacity 300ms ease;
+    }
+}
+
+/* ---------- 04 · Públicos ----------
+   Duas fotos grandes lado a lado, sangradas até a borda da tela. Aqui o texto
+   vive sobre a imagem, então o véu é escuro e a tinta é clara. */
+
+.publicos {
+    display: grid;
+    gap: 1px;
+    background: var(--grafite);
+}
+
+.publico {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 68svh;
+    padding: var(--goteira);
+    overflow: hidden;
+    isolation: isolate;
+    color: #fff;
+}
+
+.publico__foto {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.04);
+    transition: transform 1400ms var(--curva-cena);
+}
+
+.publico:hover .publico__foto {
+    transform: scale(1.09);
+}
+
+.publico__veu {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+        to top,
+        rgba(8, 11, 14, 0.82) 0%,
+        rgba(8, 11, 14, 0.45) 34%,
+        rgba(8, 11, 14, 0.08) 66%,
+        rgba(8, 11, 14, 0.14) 100%
+    );
+}
+
+/*
+ * Sem fotografia, o par vira um díptico de luz: um painel claro e um grafite.
+ * O contraste entre eles cumpre o mesmo papel que as duas fotos cumpririam —
+ * mostrar que são dois mundos diferentes — em vez de exibir duas molduras
+ * vazias lado a lado.
+ */
+.publico--tom .publico__veu {
+    background: none;
+}
+
+.publico--claro {
+    color: var(--tinta);
+    background:
+        radial-gradient(90% 70% at 76% 12%, rgba(86, 211, 227, 0.18) 0%,
+            rgba(26, 104, 199, 0.08) 40%, transparent 72%),
+        linear-gradient(170deg, #ffffff 0%, #eef2f6 100%);
+}
+
+.publico--claro .publico__rotulo {
+    color: var(--tinta-fraca);
+}
+
+.publico--claro .publico__apoio {
+    color: var(--tinta-media);
+}
+
+.publico--escuro {
+    background:
+        radial-gradient(85% 65% at 24% 14%, rgba(86, 211, 227, 0.14) 0%,
+            rgba(26, 104, 199, 0.09) 42%, transparent 74%),
+        linear-gradient(170deg, #1c2027 0%, #101317 100%);
+}
+
+/* No díptico tonal a frase é o único elemento: pode crescer. */
+.publico--tom .publico__frase {
+    font-size: var(--t-nome);
+}
+
+.publico__texto {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+    max-width: 24rem;
+}
+
+.publico__rotulo {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.publico__frase {
+    font-family: var(--fonte-display);
+    font-size: var(--t-titulo);
+    line-height: 1.04;
+    letter-spacing: var(--tr-titulo);
+    font-weight: 650;
+    margin: 0;
+}
+
+.publico__apoio {
+    font-size: var(--t-pequeno);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+    margin: 0;
+    max-width: 30rem;
+}
+
+@media (min-width: 48rem) {
+    .publicos {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .publico {
+        min-height: 86svh;
+        padding: var(--e-8) var(--e-7);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .publico__foto,
+    .publico:hover .publico__foto {
+        transform: none;
+        transition: none;
+    }
+}
+
+/* ---------- 05 · Ambientes ----------
+   Galeria assimétrica: uma peça domina e as outras acompanham em tamanhos e
+   alturas diferentes. Grade igual de seis quadrados é feed, não portfólio. */
+
+.galeria {
+    display: grid;
+    gap: var(--e-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.peca__legenda {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--e-1) var(--e-3);
+    margin-top: var(--e-3);
+}
+
+.peca__titulo {
+    font-size: var(--t-corpo);
+    font-weight: 650;
+    letter-spacing: -0.012em;
+    margin: 0;
+}
+
+.peca__texto {
+    font-size: var(--t-pequeno);
+    color: var(--tinta-fraca);
+    margin: 0;
+}
+
+/* Proporções diferentes já quebram o ritmo antes mesmo do deslocamento. */
+.peca--grande .quadro { aspect-ratio: 4 / 3; }
+.peca--alta .quadro { aspect-ratio: 3 / 4; }
+.peca--media .quadro { aspect-ratio: 1 / 1; }
+.peca--larga .quadro { aspect-ratio: 3 / 2; }
+.peca--retrato .quadro { aspect-ratio: 4 / 5; }
+
+@media (min-width: 60rem) {
+    .galeria {
+        grid-template-columns: repeat(12, 1fr);
+        gap: var(--e-8) var(--e-6);
+        align-items: start;
+    }
+
+    .peca--grande { grid-column: 1 / 8; }
+    .peca--alta { grid-column: 9 / 13; margin-top: var(--e-10); }
+    .peca--media { grid-column: 2 / 7; margin-top: var(--e-7); }
+    .peca--larga { grid-column: 7 / 13; }
+    .peca--retrato { grid-column: 3 / 8; margin-top: var(--e-7); }
+}
+
+/* No celular o deslocamento vira recuo lateral: mesma assimetria, um eixo só. */
+@media (max-width: 59.99rem) {
+    .peca--alta,
+    .peca--retrato {
+        margin-inline-start: var(--e-7);
+    }
+
+    .peca--media {
+        margin-inline-end: var(--e-7);
+    }
+}
+
+/* ---------- 06 · Sobre ----------
+   Uma frase carrega a cena; o parágrafo é o rodapé dela. Os números são fatos
+   confirmados, alinhados por fios. */
+
+.sobre {
+    display: grid;
+    gap: var(--e-7);
+}
+
+.sobre__frase {
+    max-width: 15ch;
+}
+
+.sobre__texto p + p {
+    margin-top: var(--e-4);
+}
+
+.numeros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--e-5) var(--e-6);
+    margin-top: var(--e-9);
+}
+
+.numero {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-1);
+    padding-top: var(--e-3);
+    border-top: 1px solid var(--fio);
+}
+
+.numero strong {
+    font-family: var(--fonte-display);
+    font-size: clamp(1.375rem, 2.4vw, 1.875rem);
+    line-height: 1.08;
+    letter-spacing: -0.028em;
+    font-weight: 650;
+    color: var(--tinta);
+}
+
+.numero span {
+    font-size: var(--t-pequeno);
+    line-height: 1.45;
+    color: var(--tinta-fraca);
+}
+
+@media (min-width: 60rem) {
+    .sobre {
+        grid-template-columns: repeat(12, 1fr);
+        gap: var(--e-6);
+        align-items: start;
+    }
+
+    .sobre__cabeca {
+        grid-column: 1 / 7;
+    }
+
+    .sobre__texto {
+        grid-column: 8 / 13;
+        padding-top: var(--e-2);
+    }
+}
+
+/* ---------- 07 · Qualidade ----------
+   Matriz de fios: nenhum ícone, nenhuma caixa. O agrupamento vem da linha de
+   1px no topo de cada item e do espaço entre eles. */
+
+.qualidade {
+    display: grid;
+    gap: var(--e-6) var(--e-6);
+    margin: var(--e-8) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 40rem) {
+    .qualidade {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (min-width: 64rem) {
+    .qualidade {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--e-7) var(--e-6);
+    }
+}
+
+.marco {
+    padding-top: var(--e-3);
+    border-top: 1px solid var(--fio);
+}
+
+.marco__titulo {
+    font-size: 1.0625rem;
+    font-weight: 650;
+    letter-spacing: -0.014em;
+    line-height: 1.3;
+    margin: 0 0 var(--e-1);
+}
+
+.marco__resumo {
+    font-size: var(--t-pequeno);
+    line-height: 1.55;
+    color: var(--tinta-media);
+    margin: 0;
+    max-width: 24rem;
+}
+
+/* ---------- 08 · Depoimento ----------
+   Uma citação do tamanho da confiança que ela carrega. A segunda voz existe,
+   mas em escala menor: hierarquia, não duas colunas iguais. */
+
+.depoimentos {
+    display: grid;
+    gap: var(--e-8);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.depoimento__texto {
+    font-family: var(--fonte-display);
+    font-size: var(--t-corpo);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    font-weight: 550;
+    margin: 0 0 var(--e-3);
+    text-wrap: pretty;
+}
+
+/* A primeira avaliação é a cena. As outras são o coro. */
+.depoimentos > li:first-child .depoimento__texto {
+    font-size: var(--t-display);
+    line-height: 1.06;
+    letter-spacing: var(--tr-display);
+    font-weight: 700;
+    max-width: 17ch;
+    margin-bottom: var(--e-5);
+}
+
+.depoimento__fonte {
+    font-size: var(--t-micro);
+    letter-spacing: var(--tr-micro);
+    text-transform: uppercase;
+    font-weight: 650;
+    color: var(--tinta-fraca);
+    margin: 0;
+}
+
+.depoimentos__pe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-3) var(--e-5);
+    margin-top: var(--e-8);
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--fio);
+}
+
+@media (min-width: 60rem) {
+    .depoimentos {
+        grid-template-columns: repeat(12, 1fr);
+        gap: var(--e-6);
+        align-items: end;
+    }
+
+    .depoimentos > li:first-child {
+        grid-column: 1 / 9;
+    }
+
+    .depoimentos > li + li {
+        grid-column: 9 / 13;
+        padding-bottom: var(--e-2);
+    }
+}
+
+/* ---------- 09 · Marcas ----------
+   Nomes em texto, não logotipos: marca de terceiro não se recria. Cena curta,
+   entre dois fios — presença, não anúncio. */
+
+.cena--marcas {
+    padding-block: var(--e-8);
+}
+
+.marcas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--e-3) var(--e-6);
+    padding-block: var(--e-5);
+    border-top: 1px solid var(--fio);
+    border-bottom: 1px solid var(--fio);
+}
+
+.marcas__rotulo {
+    flex: none;
+    margin-inline-end: auto;
+    padding-top: 0.15em;
+}
+
+.marcas__lista {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--e-3) clamp(1.5rem, 5vw, 4rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.marcas__lista li {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--tinta-fraca);
+}
+
+.marcas-nota {
+    font-size: var(--t-pequeno);
+    color: var(--tinta-fraca);
+    margin: var(--e-4) 0 0;
+}
+
+/* ---------- 10 · Dúvidas ---------- */
+
+.faq {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--fio);
+}
+
+.faq__item {
+    border-bottom: 1px solid var(--fio);
+}
+
+.faq__pergunta {
+    width: 100%;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--e-5);
+    padding: var(--e-5) 0;
+    text-align: left;
+    font-family: var(--fonte-display);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+    color: var(--tinta);
+    transition: color 200ms ease;
+}
+
+.faq__pergunta:hover {
+    color: var(--acento);
+}
+
+.faq__sinal {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+    align-self: center;
+    color: var(--tinta-fraca);
+    transition: transform 340ms var(--curva-saida), color 200ms ease;
+}
+
+.faq__item[data-aberto='true'] .faq__sinal {
+    transform: rotate(45deg);
+    color: var(--acento);
+}
+
+/* 0fr → 1fr anima a altura sem precisar medir o conteúdo em JavaScript. */
+.faq__corpo {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 360ms var(--curva-saida);
+}
+
+.faq__item[data-aberto='true'] .faq__corpo {
+    grid-template-rows: 1fr;
+}
+
+.faq__conteudo {
+    overflow: hidden;
+}
+
+.faq__conteudo p {
+    margin: 0;
+    padding-bottom: var(--e-5);
+    max-width: 58ch;
+    font-size: var(--t-corpo);
+    line-height: 1.65;
+    color: var(--tinta-media);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .faq__corpo,
+    .faq__sinal {
+        transition: none;
+    }
+}
+
+/* ---------- 11 · Chamada final ----------
+   O momento mais importante da página: foto sangrada, uma frase enorme e a
+   ação. Nada mais entra nesta tela. */
+
+.final {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 88svh;
+    padding-block: var(--e-cena);
+    overflow: hidden;
+    isolation: isolate;
+    color: #fff;
+}
+
+.final__midia {
+    position: absolute;
+    inset: -3vh 0;
+    z-index: -2;
+    background-image: var(--final-imagem), var(--final-campo);
+    background-size: cover, cover;
+    background-position: center 58%, center;
+    background-repeat: no-repeat;
+    transform: translate3d(0, calc((var(--p, 0.5) - 0.5) * -6vh), 0);
+    will-change: transform;
+}
+
+.final__veu {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+            105deg,
+            rgba(8, 11, 14, 0.88) 0%,
+            rgba(8, 11, 14, 0.66) 38%,
+            rgba(8, 11, 14, 0.24) 72%,
+            rgba(8, 11, 14, 0.32) 100%
+        ),
+        linear-gradient(to top, rgba(8, 11, 14, 0.5), transparent 45%);
+}
+
+.final__interno {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--e-5);
+}
+
+.final__titulo {
+    max-width: 12ch;
+}
+
+.final__apoio {
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 34ch;
+}
+
+.final .botao--primario {
+    background: #fff;
+    color: var(--grafite);
+    box-shadow: none;
+}
+
+.final .botao--primario:hover {
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.final .botao--secundario {
+    border-color: rgba(255, 255, 255, 0.42);
+    color: #fff;
+}
+
+.final .botao--secundario:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .final__midia {
+        transform: none;
+    }
+}
+
+/* ---------- 12 · Contato ----------
+   Formulário sem caixa: os campos são linhas. Uma moldura branca sobre fundo
+   claro só acrescentaria uma borda a mais para o olho contornar. */
+
+.contato {
+    display: grid;
+    gap: var(--e-8);
+}
+
+.contato__linhas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-4);
+    margin-top: var(--e-7);
+}
+
+.linha-contato {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-1);
+    padding-top: var(--e-3);
+    border-top: 1px solid var(--fio);
+    max-width: 22rem;
+}
+
+.linha-contato__rotulo {
+    font-size: var(--t-micro);
+    letter-spacing: var(--tr-micro);
+    text-transform: uppercase;
+    font-weight: 650;
+    color: var(--tinta-fraca);
+}
+
+.linha-contato__valor {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-2);
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: -0.016em;
+    color: var(--tinta);
+}
+
+a.linha-contato__valor:hover {
+    color: var(--acento);
+}
+
+.linha-contato__apoio {
+    font-size: var(--t-pequeno);
+    color: var(--tinta-fraca);
+}
+
+a.linha-contato__apoio:hover {
+    color: var(--acento);
+}
+
+.formulario {
+    display: grid;
+    gap: var(--e-5);
+}
+
+.formulario__envio {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+    margin-top: var(--e-2);
+}
+
+.formulario__envio .botao {
+    width: 100%;
+}
+
+.formulario__aviso {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--tinta-fraca);
+    margin: 0;
+}
+
+@media (min-width: 34rem) {
+    .formulario__dupla {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--e-5);
+    }
+}
+
+@media (min-width: 60rem) {
+    .contato {
+        grid-template-columns: repeat(12, 1fr);
+        gap: var(--e-6);
+        align-items: start;
+    }
+
+    .contato__lado {
+        grid-column: 1 / 6;
+    }
+
+    .contato__forma {
+        grid-column: 7 / 13;
+        padding-top: var(--e-2);
+    }
+
+    .formulario__envio {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--e-5);
+        margin-top: var(--e-4);
+    }
+
+    .formulario__envio .botao {
+        width: auto;
+        flex: none;
+    }
+}

@@ -1,0 +1,219 @@
+/*
+ * Tokens visuais da Frio Arte.
+ *
+ * Direção: "ar como arquitetura". A página é uma sequência de cenas com
+ * variação de luz — claro, grafite, claro — e não um fundo único do topo ao
+ * rodapé. O que carrega o design é fotografia, escala tipográfica e espaço.
+ *
+ * O azul da marca é acento, não ambiente: aparece na ação, no foco e no estado
+ * ativo. Ele vale justamente porque é raro.
+ *
+ * Cena escura: nenhuma cor de texto é escrita à mão nas seções. `.cena--escura`
+ * redefine os mesmos tokens de tinta, e todo componente passa a funcionar sobre
+ * grafite sem uma linha de CSS específica.
+ */
+
+:root {
+    /* ---------- Superfícies ---------- */
+    --branco: #ffffff;
+    --nevoa: #f5f6f7;
+    --nevoa-funda: #eceef0;
+    --grafite: #14171a;
+    --grafite-alto: #1c2024;
+
+    --fundo: var(--branco);
+
+    /* ---------- Tinta ----------
+       Nenhum preto puro: #101418 assenta melhor sobre branco e cansa menos.
+       O terciário é o cinza mais claro que ainda passa 4,5:1 sobre --nevoa. */
+    --tinta: #101418;
+    --tinta-media: #4a545e;
+    --tinta-fraca: #656f78;
+    --tinta-inversa: #ffffff;
+
+    /* Fio: separação por linha, quando o espaço sozinho não agrupa. */
+    --fio: rgba(16, 20, 24, 0.1);
+    --fio-forte: rgba(16, 20, 24, 0.16);
+
+    /* ---------- Marca ----------
+       Navy medido dos pixels da logo. */
+    --marca: #0a2a5c;
+    --marca-funda: #061c40;
+    --acento: #1a68c7;
+    --acento-tenue: rgba(26, 104, 199, 0.1);
+    --gelo: #56d3e3;
+    --estrela: #f0a318;
+    --aberto: #1f9950;
+    --fechado: #7d8e9c;
+
+    /* ---------- Tipografia ----------
+       Fonte do sistema: já traz corte ótico e tabelas de tracking prontas.
+       No Windows 11 e no macOS existe um corte próprio para texto grande —
+       pedir o "Display" nos títulos é ganho ótico real a custo zero. */
+    --fonte: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text',
+        'Segoe UI', system-ui, 'Helvetica Neue', Arial, sans-serif;
+    --fonte-display: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display',
+        'Segoe UI', system-ui, 'Helvetica Neue', Arial, sans-serif;
+
+    /*
+     * Escala deliberadamente extrema. Tamanho médio em tudo é o que faz uma
+     * página parecer modelo pronto: o contraste de escala cria hierarquia sem
+     * precisar de moldura, ícone ou sombra.
+     */
+    --t-mega: clamp(2.875rem, 10.5vw, 9rem);
+    --t-display: clamp(2.375rem, 7vw, 5.75rem);
+    --t-titulo: clamp(1.875rem, 4.4vw, 3.25rem);
+    --t-nome: clamp(1.5rem, 3.2vw, 2.5rem);
+    --t-sub: clamp(1.125rem, 1.6vw, 1.375rem);
+    --t-corpo: 1.0625rem;
+    --t-pequeno: 0.9375rem;
+    --t-micro: 0.75rem;
+
+    /* Tracking é específico do tamanho: fecha no grande, abre no pequeno. */
+    --tr-mega: -0.045em;
+    --tr-display: -0.038em;
+    --tr-titulo: -0.03em;
+    --tr-corpo: -0.004em;
+    --tr-micro: 0.1em;
+
+    /* ---------- Espaçamento ----------
+       Base 4, em rem: o layout cresce junto com o texto do usuário. */
+    --e-1: 0.25rem;
+    --e-2: 0.5rem;
+    --e-3: 0.75rem;
+    --e-4: 1rem;
+    --e-5: 1.5rem;
+    --e-6: 2rem;
+    --e-7: 3rem;
+    --e-8: 4rem;
+    --e-9: 6rem;
+    --e-10: 8rem;
+
+    /* O ar entre cenas é o que separa página premium de panfleto. */
+    --e-cena: clamp(5.5rem, 9vw + 4vh, 11rem);
+
+    /* ---------- Medidas ---------- */
+    --larg-cena: 84rem;
+    --larg-texto: 34rem;
+    --larg-frase: 20ch;
+    --goteira: clamp(1.25rem, 4vw, 3.5rem);
+    --altura-chrome: 4.5rem;
+
+    /* ---------- Raio ----------
+       Arquitetura pede canto contido. Pílula só onde já era a linguagem da
+       marca: os botões. */
+    --r-1: 4px;
+    --r-2: 10px;
+    --r-3: 18px;
+    --r-pilula: 999px;
+
+    /* ---------- Elevação ----------
+       Quase nada flutua. Sombra só onde existe camada real sobre conteúdo. */
+    --sombra-chrome: 0 1px 2px rgba(16, 20, 24, 0.04), 0 12px 32px rgba(16, 20, 24, 0.06);
+    --sombra-marca: 0 1px 2px rgba(10, 42, 92, 0.16), 0 10px 24px rgba(10, 42, 92, 0.18);
+
+    /* ---------- Materiais ---------- */
+    --vidro: rgba(255, 255, 255, 0.72);
+    --vidro-borda: rgba(255, 255, 255, 0.6);
+    --desfoque-chrome: blur(24px) saturate(180%);
+
+    /*
+     * ---------- Campos de cena ----------
+     *
+     * Hero e chamada final foram desenhados para receber fotografia. Enquanto
+     * ela não existe, a atmosfera é construída em CSS — o site nasce completo e
+     * recebe o material depois, sem nenhuma imagem quebrada no meio.
+     *
+     * Para publicar a foto do hero, basta trocar a linha:
+     *
+     *     --hero-imagem: url('/images/frioarte_images/hero-amplo.jpg');
+     *     --hero-imagem-alto: url('/images/frioarte_images/hero-alto.jpg');
+     *     --final-imagem: url('/images/frioarte_images/final-ambiente.jpg');
+     *
+     * O véu de leitura já está aplicado por cima em qualquer um dos casos.
+     */
+    --hero-imagem: url('/images/frioarte_images/hero-amplo.jpg');
+    --hero-imagem-alto: url('/images/frioarte_images/hero-alto.jpg');
+    --final-imagem: url('/images/frioarte_images/final-ambiente.jpg');
+
+    /* Luz da manhã entrando pela direita, sobre um horizonte muito suave. */
+    --hero-campo:
+        radial-gradient(115% 85% at 84% 6%, rgba(86, 211, 227, 0.22) 0%,
+            rgba(26, 104, 199, 0.11) 36%, transparent 68%),
+        linear-gradient(177deg, #ffffff 0%, #f3f6f9 42%, #e8eef5 61%, #f8fafb 100%);
+
+    --final-campo:
+        radial-gradient(90% 70% at 78% 18%, rgba(86, 211, 227, 0.15) 0%,
+            rgba(26, 104, 199, 0.1) 40%, transparent 72%),
+        linear-gradient(168deg, #1b2027 0%, #14171a 52%, #0d0f12 100%);
+
+    /* ---------- Curvas ----------
+       Ida e volta pelo mesmo caminho, em sentidos invertidos. */
+    --curva-saida: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --curva-entrada: cubic-bezier(0.64, 0, 0.78, 0.39);
+    --curva-cena: cubic-bezier(0.16, 0.84, 0.24, 1);
+}
+
+/*
+ * Cena escura. Só troca tinta, fio e acento — nenhum componente precisa saber
+ * em que fundo está.
+ */
+.cena--escura {
+    --fundo: var(--grafite);
+    --branco: var(--grafite-alto);
+    --nevoa: var(--grafite-alto);
+    --nevoa-funda: #24282d;
+
+    --tinta: #f4f6f8;
+    --tinta-media: rgba(244, 246, 248, 0.68);
+    --tinta-fraca: rgba(244, 246, 248, 0.52);
+    --tinta-inversa: var(--grafite);
+
+    --fio: rgba(255, 255, 255, 0.13);
+    --fio-forte: rgba(255, 255, 255, 0.24);
+
+    /* Azul da marca não tem contraste sobre grafite: sobe de luminosidade. */
+    --acento: #6fb4f2;
+    --acento-tenue: rgba(111, 180, 242, 0.14);
+    --marca: #f4f6f8;
+    --marca-funda: #dfe4e9;
+
+    --vidro: rgba(20, 23, 26, 0.66);
+    --vidro-borda: rgba(255, 255, 255, 0.12);
+
+    background-color: var(--grafite);
+    color: var(--tinta);
+}
+
+/* Transparência reduzida: os materiais viram superfícies sólidas. */
+@media (prefers-reduced-transparency: reduce) {
+    :root {
+        --vidro: var(--branco);
+        --desfoque-chrome: none;
+    }
+
+    .cena--escura {
+        --vidro: var(--grafite);
+    }
+}
+
+/* Quem pede contraste não quer suavidade: bordas definidas e tinta firme. */
+@media (prefers-contrast: more) {
+    :root {
+        --tinta: #05080b;
+        --tinta-media: #2b343d;
+        --tinta-fraca: #46505a;
+        --fio: rgba(16, 20, 24, 0.42);
+        --fio-forte: rgba(16, 20, 24, 0.62);
+        --vidro: var(--branco);
+        --desfoque-chrome: none;
+    }
+
+    .cena--escura {
+        --tinta: #ffffff;
+        --tinta-media: rgba(255, 255, 255, 0.9);
+        --tinta-fraca: rgba(255, 255, 255, 0.78);
+        --fio: rgba(255, 255, 255, 0.45);
+        --vidro: var(--grafite);
+    }
+}

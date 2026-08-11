@@ -1,0 +1,13 @@
+interface:
+  display_name: arquitetura e organizao
+  short_description: 'Esta skill define um padrão arquitetural para criação e evolução
+    de aplicações web monolíticas utilizando:'
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
