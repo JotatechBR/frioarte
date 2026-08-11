@@ -5,6 +5,8 @@ window.FrioArteRegistro.registrar('identidade', { precisaDados: true }, (perfil)
 
     campos({
         nome: perfil.nome,
+        'empresa-razao': perfil.empresa.razaoSocial,
+        'empresa-cnpj': perfil.empresa.cnpj,
         telefone: perfil.telefone.formatado,
         whatsapp: perfil.whatsapp.formatado,
         'endereco-linha1': perfil.endereco.linha1,
@@ -13,7 +15,7 @@ window.FrioArteRegistro.registrar('identidade', { precisaDados: true }, (perfil)
         'atendimento-detalhe': perfil.atendimento.detalhe,
         'atendimento-publico': perfil.atendimento.publico,
         'situacao-estado': perfil.funcionamento.situacao,
-        'situacao-proxima': perfil.funcionamento.proximaAbertura,
+        'situacao-proxima': perfil.funcionamento.detalhe,
         ano: String(new Date().getFullYear())
     });
 

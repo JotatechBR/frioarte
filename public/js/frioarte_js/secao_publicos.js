@@ -12,7 +12,7 @@
 const TONS = ['publico--claro', 'publico--escuro'];
 
 window.FrioArteRegistro.registrar('publicos', { precisaDados: true }, (perfil) => {
-    const { lista, escapar } = window.FrioArteDom;
+    const { lista, figura, escapar } = window.FrioArteDom;
 
     lista(
         'publicos',
@@ -22,7 +22,7 @@ window.FrioArteRegistro.registrar('publicos', { precisaDados: true }, (perfil) =
 
             return `
             <article class="publico${tom}">
-                ${fundo(publico, escapar)}
+                ${fundo(publico, figura)}
 
                 <div class="publico__texto">
                     <p class="rotulo publico__rotulo" data-revelar="subir">${escapar(publico.rotulo)}</p>
@@ -34,11 +34,10 @@ window.FrioArteRegistro.registrar('publicos', { precisaDados: true }, (perfil) =
     );
 });
 
-function fundo(publico, escapar) {
+function fundo(publico, figura) {
     if (!publico.imagem) return '';
 
     return `
-        <img class="publico__foto" src="${escapar(publico.imagem)}"
-             alt="${escapar(publico.alt || '')}" loading="lazy" decoding="async">
+        ${figura(publico, { class: 'publico__foto' })}
         <div class="publico__veu" aria-hidden="true"></div>`;
 }

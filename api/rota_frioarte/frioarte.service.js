@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const FRIOARTE = require('../shared/frioarte.dados');
+const funcionamento = require('../shared/funcionamento');
 
 const PUBLICO = path.join(__dirname, '..', '..', 'public');
 
@@ -18,7 +19,7 @@ const PUBLICO = path.join(__dirname, '..', '..', 'public');
  * usa a composição alternativa em vez de apontar para uma imagem quebrada.
  */
 function obterPerfil() {
-    const { telefone, whatsapp, endereco, nome, funcionamento, redes } = FRIOARTE;
+    const { telefone, whatsapp, endereco, nome, redes } = FRIOARTE;
 
     const saudacao = `Olá! Vim pelo site da ${nome} e gostaria de mais informações.`;
 
@@ -33,11 +34,9 @@ function obterPerfil() {
         publicos: FRIOARTE.publicos.map(comFoto),
         projetos: FRIOARTE.projetos.map(comFoto),
 
-        funcionamento: {
-            ...funcionamento,
-            // O frontend pinta o indicador a partir daqui, sem interpretar texto.
-            aberto: funcionamento.situacao.trim().toLowerCase() === 'aberto'
-        },
+        // Estado, frase e horários derivados da grade, no relógio de São Paulo.
+        // O frontend pinta o indicador a partir de `aberto`, sem ler texto.
+        funcionamento: funcionamento.calcular(FRIOARTE.funcionamento),
 
         links: {
             ligar: `tel:${telefone.discagem}`,
@@ -52,9 +51,22 @@ function obterPerfil() {
     };
 }
 
-/** Devolve o item com a foto confirmada — ou sem foto, se o arquivo não existe. */
+/**
+ * Devolve o item com a foto confirmada — ou sem foto, se o arquivo não existe.
+ *
+ * `imagemWebp` é o mesmo arquivo em WebP, gerado por `npm run imagens`. Vem
+ * separado, e não no lugar do JPG, porque o `<picture>` precisa dos dois: o
+ * WebP é a oferta, o JPG é a garantia para quem não o lê. Se o WebP ainda não
+ * foi gerado, o campo é `null` e a página serve o JPG direto.
+ */
 function comFoto(item) {
-    return { ...item, imagem: foto(item.imagem) };
+    const imagem = foto(item.imagem);
+
+    return {
+        ...item,
+        imagem,
+        imagemWebp: imagem ? foto(imagem.replace(/\.jpe?g$/i, '.webp')) : null
+    };
 }
 
 /**

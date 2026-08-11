@@ -11,7 +11,7 @@
  */
 
 window.FrioArteRegistro.registrar('servicos', { precisaDados: true }, (perfil) => {
-    const { campo, lista, escapar } = window.FrioArteDom;
+    const { campo, lista, figura, escapar } = window.FrioArteDom;
     const itens = perfil.servicos.lista;
 
     campo('servicos-categoria', perfil.servicos.categoria);
@@ -26,10 +26,11 @@ window.FrioArteRegistro.registrar('servicos', { precisaDados: true }, (perfil) =
     lista(
         'servicos-fotos',
         itens.filter((servico) => servico.imagem),
-        (servico) => `
-            <img class="servicos__foto" src="${escapar(servico.imagem)}"
-                 alt="${escapar(servico.alt || '')}" data-foto="${escapar(servico.imagem)}"
-                 loading="lazy" decoding="async">`
+        (servico) =>
+            figura(servico, {
+                class: 'servicos__foto',
+                'data-foto': servico.imagem
+            })
     );
 
     /*

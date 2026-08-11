@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Página não encontrada — Frio Arte Ar Condicionado</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="color-scheme" content="light only">
+    <link rel="icon" href="/midias/frioarte-simbolo.png" type="image/png">
+    <link rel="apple-touch-icon" href="/midias/frioarte-simbolo.png">
+
+    <link rel="stylesheet" href="/css/shared/variaveis.css">
+    <link rel="stylesheet" href="/css/shared/base.css">
+    <link rel="stylesheet" href="/css/frioarte_css/frioarte.css">
+
+    <style>
+        /*
+         * A página cabe aqui. São quatro elementos numa tela — carregar
+         * secoes.css inteiro por causa deles seria pedir 20 KB para nada.
+         */
+        .perdido {
+            min-height: 100svh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center ;
+            gap: var(--e-5);
+            padding-block: var(--e-9);
+        }
+
+        .perdido__marca {
+            margin-bottom: var(--e-4);
+        }
+
+        .perdido__codigo {
+            font-family: var(--fonte-display);
+            font-size: var(--t-micro);
+            letter-spacing: var(--tr-micro);
+            text-transform: uppercase;
+            font-weight: 650;
+            color: var(--tinta-fraca);
+            margin: 0;
+        }
+
+        .perdido__titulo {
+            max-width: 14ch;
+            margin: 0;
+        }
+
+        .perdido__apoio {
+            max-width: 46ch;
+            color: var(--tinta-media);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="conteudo perdido">
+        <a class="marca perdido__marca" href="/" aria-label="Frio Arte Ar Condicionado — início">
+            <img class="marca__logo" src="/midias/frioarte-marca.png"
+                 alt="Frio Arte Ar Condicionado" width="310" height="86">
+        </a>
+
+        <p class="perdido__codigo">Erro 404</p>
+
+        <h1 class="display perdido__titulo">Esta página não existe.</h1>
+
+        <p class="sub perdido__apoio">
+            O endereço pode ter mudado ou sido digitado com alguma diferença.
+            A Frio Arte continua no mesmo lugar.
+        </p>
+
+        <div class="acoes">
+            <a class="botao botao--primario botao--grande" href="/" data-pressionavel>
+                Voltar para o início
+            </a>
+
+            <a class="botao botao--secundario botao--grande" href="/#contato" data-pressionavel>
+                Falar com a Frio Arte
+            </a>
+        </div>
+    </main>
+
+    <script src="/js/shared/pressao.js"></script>
+    <script>
+        // Sem registro nem API nesta página: só o toque nos botões.
+        try {
+            window.FrioArtePressao.ativarPressao();
+        } catch (erro) {
+            console.error('[frioarte] pressão falhou na 404:', erro);
+        }
+    </script>
+</body>
+</html>

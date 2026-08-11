@@ -1,5 +1,10 @@
 node_modules/
 .env
+
+# Material bruto de imagem (originais pesados). O que vai para o site é a
+# versão tratada em public/images/ — o original fica fora do repositório.
+_bruto/
+*.psd
 logs/
 data/
 uploads/

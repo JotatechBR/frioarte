@@ -26,6 +26,18 @@ const FRIOARTE = {
     nome: 'Frio Arte Ar Condicionado',
     nomeCurto: 'Frio Arte',
 
+    /** Endereço público do site, usado em canonical, Open Graph e sitemap. */
+    site: {
+        dominio: 'https://frioarte.com'
+    },
+
+    /** Dados de registro. Aparecem no rodapé e nos dados estruturados. */
+    empresa: {
+        razaoSocial: 'Clailton Rodrigues Correia',
+        nomeFantasia: 'Frio Arte Ar Condicionado',
+        cnpj: '42.348.913/0001-43'
+    },
+
     /* Telefone e WhatsApp são linhas diferentes: um não deriva do outro. */
     telefone: {
         formatado: '(11) 95229-5391',
@@ -37,11 +49,21 @@ const FRIOARTE = {
         numero: '5511972473317'
     },
 
+    /**
+     * Vila Feliz é o bairro do cadastro; Penha é o distrito que dá nome à
+     * região e é como o cliente procura. Os dois são verdade — o bairro vai
+     * nos campos estruturados, a região fica em `atendimento`.
+     */
     endereco: {
         linha1: 'Rua São Florêncio, 76',
-        linha2: 'Penha, São Paulo - SP',
+        linha2: 'Vila Feliz, São Paulo - SP',
+        logradouro: 'Rua São Florêncio, 76',
+        bairro: 'Vila Feliz',
+        cidade: 'São Paulo',
+        uf: 'SP',
+        pais: 'BR',
         cep: '03615-000',
-        completo: 'Rua São Florêncio, 76 - Penha, São Paulo - SP, 03615-000'
+        completo: 'Rua São Florêncio, 76 - Vila Feliz, São Paulo - SP, 03615-000'
     },
 
     atendimento: {
@@ -50,9 +72,8 @@ const FRIOARTE = {
         publico: 'Residências, comércios e empresas'
     },
 
-    /** Sem perfil confirmado: enquanto for `null`, o link não aparece no rodapé. */
     redes: {
-        instagram: null
+        instagram: '@frioartearcondicionado'
     },
 
     avaliacao: {
@@ -61,9 +82,25 @@ const FRIOARTE = {
         fonte: 'Google'
     },
 
+    /**
+     * Grade de funcionamento — a única coisa declarada à mão.
+     *
+     * Índice = dia da semana no padrão JavaScript (0 domingo … 6 sábado);
+     * `null` é dia fechado. Aberto/Fechado e a frase "Abre seg. às 09:00" são
+     * calculados a partir daqui pelo service, sempre no fuso de São Paulo.
+     * Ninguém precisa vir aqui mudar "Fechado" na segunda de manhã.
+     */
     funcionamento: {
-        situacao: 'Fechado',
-        proximaAbertura: 'Abre seg. às 07:00',
+        fusoHorario: 'America/Sao_Paulo',
+        grade: {
+            0: null,
+            1: { abre: '09:00', fecha: '18:00' },
+            2: { abre: '09:00', fecha: '18:00' },
+            3: { abre: '09:00', fecha: '18:00' },
+            4: { abre: '09:00', fecha: '18:00' },
+            5: { abre: '09:00', fecha: '18:00' },
+            6: null
+        },
         aviso: 'Feriados podem afetar o horário de funcionamento'
     },
 
@@ -235,9 +272,24 @@ const FRIOARTE = {
     /** Marcas com que a empresa trabalha — exibidas como texto, não como logotipo. */
     marcas: ['LG', 'Samsung', 'Midea', 'Gree'],
 
+    /**
+     * Duas avaliações reais do perfil no Google, transcritas na íntegra e com
+     * o nome como aparece lá. Nada de recorte que mude o sentido, nada de
+     * texto escrito para o site: o `autor` é o que separa depoimento de slogan.
+     */
     avaliacoes: [
-        { texto: 'Super recomendo melhores atendimentos , serviço de qualidade', fonte: 'Avaliação no Google' },
-        { texto: 'Recomendamos a loja Frio Arte com certeza', fonte: 'Avaliação no Google' }
+        {
+            texto:
+                'Recomendo 100% o Tom e sua equipe. Profissionais sérios, fazem serviço de qualidade, sem pressa de ir embora. Já instalei 4 aparelhos com eles.',
+            autor: 'Felipe M. S.',
+            fonte: 'Avaliação no Google'
+        },
+        {
+            texto:
+                'Recomendo está loja, o técnico Tom muito atencioso, resolveu o problema rapidinho do ar condicionado aqui em casa. Recomendamos a loja Frio Arte com certeza',
+            autor: 'Cris Araujo',
+            fonte: 'Avaliação no Google'
+        }
     ],
 
     faq: [

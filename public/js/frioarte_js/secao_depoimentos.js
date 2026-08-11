@@ -14,8 +14,11 @@ window.FrioArteRegistro.registrar('depoimentos', { precisaDados: true }, (perfil
         perfil.avaliacoes,
         (item) => `
             <li data-revelar="subir">
-                <p class="depoimento__texto">“${escapar(item.texto)}”</p>
-                <p class="depoimento__fonte">${escapar(item.fonte)}</p>
+                <blockquote class="depoimento__texto">“${escapar(item.texto)}”</blockquote>
+                <p class="depoimento__fonte">
+                    ${item.autor ? `<span class="depoimento__autor">${escapar(item.autor)}</span>` : ''}
+                    ${escapar(item.fonte)}
+                </p>
             </li>`
     );
 });

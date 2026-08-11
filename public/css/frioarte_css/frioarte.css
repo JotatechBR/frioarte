@@ -455,6 +455,17 @@
     color: var(--tinta-fraca);
 }
 
+/* A linha mais discreta da página: precisa estar, não precisa competir. */
+.rodape__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2);
+    margin: var(--e-3) 0 0;
+    font-size: 0.8125rem;
+    color: var(--tinta-fraca);
+    opacity: 0.72;
+}
+
 /* ---------- Barra de ação no celular ----------
    Ao alcance do polegar. Sai de cena quando o rodapé já traz as mesmas ações,
    então nunca cobre conteúdo que a pessoa acabou de alcançar. */

@@ -1,3 +1,4 @@
+
 # Frio Arte Ar Condicionado
 
 Site institucional da Frio Arte. Monólito Node.js + Express servindo a página e a
@@ -12,6 +13,10 @@ npm start
 
 Depois abra `http://localhost:3000`.
 
+Em desenvolvimento a home é remontada a cada pedido, então basta salvar o HTML e
+dar F5. Em produção (`NODE_ENV=production`) ela é montada uma vez e fica em
+memória.
+
 ## Estrutura
 
 ```text
@@ -20,29 +25,40 @@ frio arte/
 │
 ├── api/
 │   ├── routes.js                   Registro central das rotas /api
-│   ├── pages.js                    Registro das páginas HTML
+│   ├── pages.js                    Home com SEO injetado, robots.txt, sitemap, 404
 │   ├── middleware/
 │   │   └── tratamentoErros.js      404 da API e handler global de erro
 │   ├── shared/
-│   │   └── frioarte.dados.js       TODO o conteúdo do site (fonte única)
+│   │   ├── frioarte.dados.js       TODO o conteúdo do site (fonte única)
+│   │   ├── funcionamento.js        Calcula Aberto/Fechado a partir da grade
+│   │   └── seo.js                  Monta canonical, Open Graph e JSON-LD
 │   └── rota_frioarte/
 │       ├── rota_frioarte.js        GET /api/frioarte
-│       └── frioarte.service.js     Monta o perfil e deriva os links de contato
+│       └── frioarte.service.js     Monta o perfil, deriva links e confirma fotos
+│
+├── scripts/
+│   └── imagens.js                  Gera os WebP e a imagem de prévia de link
 │
 └── public/
-    ├── html/frioarte_html/frioarte.html
+    ├── html/frioarte_html/
+    │   ├── frioarte.html           A home
+    │   └── 404.html                Página de endereço inexistente
     ├── css/
     │   ├── shared/                 variaveis.css (tokens), base.css
     │   └── frioarte_css/           frioarte.css (chrome), secoes.css (seções)
     ├── js/
-    │   ├── shared/                 pressao.js, revelar.js
-    │   └── frioarte_js/            main.js, api.js, icones.js, conteudo.js,
-    │                               cabecalho.js, menu.js, faq.js, orcamento.js
-    ├── images/frioarte_images/     Fotos da empresa (ver LEIA-ME.md da pasta)
-    └── midias/                     Logo da marca
+    │   ├── shared/                 registro.js, dom.js, pressao.js, revelar.js,
+    │   │                           progresso.js
+    │   └── frioarte_js/            api.js, main.js,
+    │                               chrome_* (cabeçalho, menu, navegação, barra),
+    │                               global_* (identidade, links, avaliação),
+    │                               secao_* (uma por cena da página),
+    │                               orcamento_* (validação, mensagem)
+    ├── images/frioarte_images/     Fotos do site, em JPG e WebP (ver LEIA-ME.md)
+    └── midias/
         ├── frioarte-marca.png      Lockup completo — cabeçalho e rodapé
         ├── frioarte-simbolo.png    Só o floco, quadrado — favicon
-        └── image-removebg-preview.png   Arquivo original enviado (não usado)
+        └── frioarte-og.jpg         1200×630, prévia do link (gerada pelo script)
 ```
 
 ## Fluxo da página
@@ -54,34 +70,100 @@ frioarte.html → main.js → api.js → GET /api/frioarte
                                         ↓
                                  frioarte.dados.js
                                         ↓
-                                      JSON → conteudo.js → tela
+                                      JSON → módulos secao_* → tela
 ```
 
 **Para mudar qualquer texto do site, edite `api/shared/frioarte.dados.js`.**
 Nada de conteúdo solto no HTML: o HTML só tem estrutura e ganchos `data-campo` /
-`data-lista` que o `conteudo.js` preenche.
+`data-lista` que os módulos preenchem.
+
+Cada módulo se registra sozinho em `registro.js` e roda dentro do próprio
+try/catch — um que falhe não derruba os outros.
 
 ## Seções da home
 
-| # | Seção | Fonte do conteúdo |
-| - | ----- | ----------------- |
-| 1 | Cabeçalho | nav fixa no HTML |
-| 2 | Hero + cartão de destaques | `hero` |
-| 3 | Serviços | `servicos.lista` |
-| 4 | Diferenciais | `diferenciais` |
-| 5 | Projetos | `projetos` |
-| 6 | Sobre | `sobre` |
-| 7 | Marcas | `marcas` |
-| 8 | Depoimentos | `avaliacoes` + `avaliacao` |
-| 9 | FAQ | `faq` |
-| 10 | Chamada final + orçamento | `opcoesOrcamento` |
-| 11 | Rodapé | `endereco`, `telefone`, `redes` |
+| #  | Seção                     | Fonte do conteúdo            |
+| -- | ------------------------- | ---------------------------- |
+| 1  | Cabeçalho                 | nav fixa no HTML             |
+| 2  | Hero                      | frase no HTML + `avaliacao`  |
+| 3  | Declaração                | frase no HTML                |
+| 4  | Serviços                  | `servicos.lista`             |
+| 5  | Públicos                  | `publicos`                   |
+| 6  | Projetos                  | `projetos`                   |
+| 7  | Sobre                     | `sobre` + `atendimento`      |
+| 8  | Qualidade                 | `diferenciais`               |
+| 9  | Depoimentos               | `avaliacoes` + `avaliacao`   |
+| 10 | Marcas                    | `marcas`                     |
+| 11 | Dúvidas                   | `faq`                        |
+| 12 | Chamada final             | frase no HTML                |
+| 13 | Contato + orçamento       | `opcoesOrcamento`, contatos  |
+| 14 | Rodapé                    | `endereco`, `empresa`, `redes` |
 
-## API
+As frases-cena (hero, declaração, sobre, chamada final) vivem no HTML de
+propósito: a quebra de linha faz parte da composição, não do texto.
+
+## Rotas
 
 | Método | Rota            | Retorno                                   |
 | ------ | --------------- | ----------------------------------------- |
+| GET    | `/`             | Home, com o bloco de SEO injetado          |
 | GET    | `/api/frioarte` | `{ sucesso: true, dados: { ...perfil } }` |
+| GET    | `/robots.txt`   | Gerado a partir do domínio nos dados      |
+| GET    | `/sitemap.xml`  | Uma entrada; `lastmod` = data do conteúdo |
+| —      | qualquer outra  | `404.html`                                |
+
+## Horário de funcionamento
+
+A empresa declara só a grade, em `funcionamento.grade` — índice 0 é domingo,
+`null` é dia fechado:
+
+```js
+grade: {
+    1: { abre: '09:00', fecha: '18:00' },   // segunda
+    ...
+    6: null                                 // sábado fechado
+}
+```
+
+`api/shared/funcionamento.js` calcula o resto no relógio de São Paulo (não no do
+servidor): `situacao`, `aberto`, o `detalhe` que a tela mostra ("Fecha às 18:00",
+"Abre seg. às 09:00") e o `horarios` no formato schema.org.
+
+Para mudar o horário, mexa só na grade.
+
+## SEO
+
+`api/shared/seo.js` monta canonical, Open Graph, Twitter Card e o JSON-LD
+`HVACBusiness` a partir dos dados, e `pages.js` injeta tudo no lugar do
+marcador `<!-- SEO -->` da home. É feito no servidor porque quem lê essas tags —
+robô de busca, prévia de link do WhatsApp — em geral não executa JavaScript.
+
+Nunca escreva endereço, telefone ou horário direto no `<head>`: mude o dado e a
+cabeça acompanha.
+
+**A nota do Google não é declarada como `aggregateRating` de propósito.** A
+empresa marcar a própria nota é avaliação de si mesmo na política do Google:
+não gera estrela na busca e pode render aviso no Search Console. A nota
+continua visível na página; ela só não vira dado estruturado.
+
+## Imagens
+
+```bash
+npm run imagens
+```
+
+Gera o `.webp` de cada JPG de `public/images/frioarte_images/` e recorta a
+prévia de link em `public/midias/frioarte-og.jpg`. É script de manutenção: roda
+quando chega foto nova e o resultado é commitado — o servidor em produção não
+depende do `sharp`.
+
+O service confirma cada arquivo em disco antes de publicá-lo, e entrega o par
+`imagem` (JPG) + `imagemWebp`. O helper `figura()` em `dom.js` monta o
+`<picture>`: WebP para quem lê, JPG para o resto. Foto cuja conversão ainda não
+rodou sai como `<img>` puro, sem quebrar nada.
+
+Os originais pesados ficam **fora** do repositório (`_bruto/` está no
+`.gitignore`).
 
 ## Formulário de orçamento
 
@@ -92,16 +174,14 @@ da empresa com o texto já escrito, para o pedido chegar onde a Frio Arte atende
 Se um dia for preciso guardar os pedidos, o caminho é criar `api/rota_orcamentos/`
 com repository e uma tabela — a estrutura do projeto já comporta.
 
-## Pendências de conteúdo
+## Pendências
 
-Estes pontos estão marcados no código e esperam confirmação da empresa:
-
-- **Fotos.** Nenhuma foto foi entregue. A seção Projetos mostra molduras "Foto em
-  breve". Instruções em `public/images/frioarte_images/LEIA-ME.md`.
-- **Instagram.** `redes.instagram` está `null` e o link não aparece no rodapé.
-  Basta preencher com o @ para ele surgir.
-- **Horário da semana.** O site mostra `funcionamento.situacao` e
-  `proximaAbertura`, atualizados à mão. Com a grade dia a dia, dá para o service
-  calcular Aberto/Fechado sozinho.
-- **Textos dos serviços e do Sobre.** Foram redigidos para o site e devem ser
-  revisados pela empresa antes de publicar.
+- **Fotografia.** Todas as imagens do site são geradas por IA, usadas como
+  referência de ambiente com o aval da empresa. Os itens de `projetos` carregam
+  `gerada: true`. Ao substituir por foto real de um trabalho executado, apague a
+  marca — é ela que separa ilustração de portfólio.
+- **Textos dos serviços e do Sobre.** Foram redigidos para o site e ainda
+  esperam revisão da empresa.
+- **Histórico do Git.** As imagens brutas saíram de `public/`, mas continuam no
+  histórico do commit `c7b9ae3` (~99 MB). Todo clone ainda baixa esse peso;
+  limpar exige reescrever o histórico.

@@ -531,13 +531,16 @@
     text-wrap: pretty;
 }
 
-/* A primeira avaliação é a cena. As outras são o coro. */
+/* A primeira avaliação é a cena. As outras são o coro.
+   A escala é `--t-nome`, e não `--t-display`, porque estas são avaliações
+   reais: têm o comprimento que a pessoa escreveu, não o que caberia bonito.
+   Em corpo display uma frase de 150 caracteres viraria uma parede de texto. */
 .depoimentos > li:first-child .depoimento__texto {
-    font-size: var(--t-display);
-    line-height: 1.06;
-    letter-spacing: var(--tr-display);
+    font-size: var(--t-nome);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
     font-weight: 700;
-    max-width: 17ch;
+    max-width: 26ch;
     margin-bottom: var(--e-5);
 }
 
@@ -548,6 +551,16 @@
     font-weight: 650;
     color: var(--tinta-fraca);
     margin: 0;
+}
+
+/* O nome vem antes da origem e com mais peso: é ele que dá lastro à frase. */
+.depoimento__autor {
+    color: var(--tinta);
+}
+
+.depoimento__autor::after {
+    content: ' · ';
+    color: var(--tinta-fraca);
 }
 
 .depoimentos__pe {

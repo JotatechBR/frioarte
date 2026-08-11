@@ -10,6 +10,30 @@
     <link rel="icon" href="/midias/frioarte-simbolo.png" type="image/png">
     <link rel="apple-touch-icon" href="/midias/frioarte-simbolo.png">
 
+    <!--
+      Canonical, Open Graph, Twitter Card e JSON-LD entram aqui, montados pelo
+      servidor a partir de api/shared/frioarte.dados.js. Não escreva endereço,
+      telefone nem horário nesta página: mude o dado e a cabeça acompanha.
+    -->
+    <!-- SEO -->
+
+    <!--
+      O hero é a maior imagem da primeira tela e entra por `background-image`,
+      onde o navegador só a descobre depois de baixar e ler o CSS. O preload
+      adianta esse pedido — é o que decide o LCP da página.
+
+      O `media` repete exatamente o ponto de virada de frioarte.css, senão o
+      navegador baixaria as duas. Se aquele valor mudar, este muda junto.
+
+      JPG e não WebP de propósito: em `background-image` não existe fallback
+      por tipo como no `<picture>`, e estes dois arquivos já são os mais leves
+      do site. As fotos de conteúdo, essas sim, vão em WebP.
+    -->
+    <link rel="preload" as="image" href="/images/frioarte_images/hero-amplo.jpg"
+          media="(min-width: 48rem)" fetchpriority="high">
+    <link rel="preload" as="image" href="/images/frioarte_images/hero-alto.jpg"
+          media="(max-width: 47.99rem)" fetchpriority="high">
+
     <link rel="stylesheet" href="/css/shared/variaveis.css">
     <link rel="stylesheet" href="/css/shared/base.css">
     <link rel="stylesheet" href="/css/frioarte_css/frioarte.css">
@@ -479,6 +503,13 @@
                 <span>Região atendida: <span data-campo="atendimento-resumo"></span> — <span data-campo="atendimento-detalhe"></span></span>
                 <span>© <span class="numeral" data-campo="ano"></span> <span data-campo="nome"></span></span>
             </div>
+
+            <!-- Identificação legal: quem é a empresa por trás do nome fantasia. -->
+            <p class="rodape__legal">
+                <span data-campo="empresa-razao"></span>
+                <span aria-hidden="true">·</span>
+                CNPJ <span class="numeral" data-campo="empresa-cnpj"></span>
+            </p>
         </div>
     </footer>
 

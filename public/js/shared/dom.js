@@ -39,6 +39,39 @@ function lista(nome, itens, montarItem) {
     return true;
 }
 
+/**
+ * Monta a foto de uma seção, em WebP quando existe e em JPG sempre.
+ *
+ * O `<picture>` é a única forma de oferecer WebP sem apostar que o navegador
+ * o entende: quem lê o formato pega o `<source>`, quem não lê cai no `<img>`,
+ * e nenhum dos dois baixa o arquivo do outro. Sem `imagemWebp` — foto nova
+ * cuja conversão ainda não rodou — devolve o `<img>` puro, sem embrulho.
+ *
+ * `atributos` entra no `<img>`, que é o elemento que o CSS e o JS enxergam.
+ */
+function figura(item, atributos = {}) {
+    if (!item || !item.imagem) return '';
+
+    const pares = { loading: 'lazy', decoding: 'async', ...atributos };
+
+    const extras = Object.entries(pares)
+        .filter(([, valor]) => valor !== null && valor !== undefined && valor !== false)
+        .map(([chave, valor]) => `${chave}="${escapar(valor)}"`)
+        .join(' ');
+
+    const img =
+        `<img src="${escapar(item.imagem)}" alt="${escapar(item.alt || '')}" ${extras}>`;
+
+    if (!item.imagemWebp) return img;
+
+    return (
+        '<picture>' +
+        `<source type="image/webp" srcset="${escapar(item.imagemWebp)}">` +
+        img +
+        '</picture>'
+    );
+}
+
 /** Aplica um href a todos os `[data-link="nome"]`. */
 function link(nome, destino) {
     if (!destino) return;
@@ -48,4 +81,4 @@ function link(nome, destino) {
     });
 }
 
-window.FrioArteDom = { escapar, campo, campos, lista, link };
+window.FrioArteDom = { escapar, campo, campos, lista, figura, link };

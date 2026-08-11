@@ -12,7 +12,7 @@ const SEM_FOTO =
 const FORMATOS = ['grande', 'alta', 'media', 'larga', 'retrato'];
 
 window.FrioArteRegistro.registrar('projetos', { precisaDados: true }, (perfil) => {
-    const { lista, escapar } = window.FrioArteDom;
+    const { lista, figura, escapar } = window.FrioArteDom;
 
     lista(
         'projetos',
@@ -25,7 +25,7 @@ window.FrioArteRegistro.registrar('projetos', { precisaDados: true }, (perfil) =
 
             return `
             <li class="peca peca--${escapar(formato)}">
-                <div class="quadro" data-revelar="foto">${quadro(projeto, escapar)}</div>
+                <div class="quadro" data-revelar="foto">${quadro(projeto, figura)}</div>
                 <div class="peca__legenda">
                     <h3 class="peca__titulo">${escapar(projeto.titulo)}</h3>
                     <p class="peca__texto">${escapar(projeto.legenda)}</p>
@@ -39,11 +39,9 @@ window.FrioArteRegistro.registrar('projetos', { precisaDados: true }, (perfil) =
  * Com foto, mostra a foto. Sem foto, mostra uma moldura que se assume como
  * espaço reservado — o site não simula um trabalho que ainda não existe.
  */
-function quadro(projeto, escapar) {
+function quadro(projeto, figura) {
     if (projeto.imagem) {
-        return `<img src="${escapar(projeto.imagem)}"
-                     alt="${escapar(projeto.alt || projeto.titulo)}"
-                     loading="lazy" decoding="async">`;
+        return figura({ ...projeto, alt: projeto.alt || projeto.titulo });
     }
 
     return `
