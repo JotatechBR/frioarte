@@ -1,0 +1,801 @@
+/*
+ * Sistema interno — estrutura.
+ *
+ * Continuação da linguagem do site: os mesmos tokens de tinta, fio e marca, a
+ * mesma fonte, o mesmo azul raro. O que muda é a escala. Uma página de venda
+ * grita; uma ferramenta de trabalho conversa — então a escala tipográfica cai,
+ * o espaço continua generoso e o azul aparece só onde existe ação ou estado.
+ *
+ * Duas superfícies, e só duas: a barra lateral em névoa translúcida e o
+ * conteúdo em branco. Nada de cinza intermediário para "separar seções" — quem
+ * separa é o espaço.
+ */
+
+.app {
+    /* ---------- Escala da ferramenta ----------
+       A do site vai a 9rem, que é escala de vitrine. Aqui o maior título é o
+       recado do painel, e ele não precisa passar de ~4rem para dominar. */
+    --t-mega: clamp(2.125rem, 4.4vw, 3.625rem);
+    --t-display: clamp(1.75rem, 3vw, 2.5rem);
+    --t-titulo: clamp(1.375rem, 1.9vw, 1.75rem);
+    --t-nome: clamp(1.0625rem, 1.25vw, 1.1875rem);
+    --t-sub: clamp(1rem, 1.15vw, 1.125rem);
+
+    /* ---------- Medidas do sistema ---------- */
+    --lateral: 16.5rem;
+    --topo-altura: 3.75rem;
+    --barra-altura: 4.25rem;
+    --larg-tela: 66rem;
+    --goteira-app: clamp(1.25rem, 3.4vw, 3.5rem);
+    --pilha: 4.5rem;
+
+    /* ---------- Tons de estado ----------
+       Cor aqui é informação, não enfeite: verde, âmbar, vermelho e o azul da
+       marca, cada um com um significado fixo em todo o sistema. */
+    --tom-bom: #17703c;
+    --tom-bom-luz: #21a054;
+    --tom-atencao: #8a5910;
+    --tom-atencao-luz: #f0a318;
+    --tom-ruim: #ab2b23;
+    --tom-ruim-luz: #d93a3a;
+    --tom-ativo: var(--acento);
+    --tom-ativo-luz: var(--acento);
+    --tom-neutro: var(--tinta-fraca);
+    --tom-neutro-luz: var(--fio-forte);
+
+    --r-campo: 12px;
+    --r-folha: 20px;
+
+    min-height: 100dvh;
+    background: var(--branco);
+}
+
+/* A folha aberta trava o fundo — senão o conteúdo rola atrás do diálogo. */
+html[data-travado] {
+    overflow: hidden;
+}
+
+/* ============================================================
+   Barra lateral
+   ============================================================ */
+
+.lateral {
+    display: none;
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    width: var(--lateral);
+    padding: 0 var(--e-4) var(--e-4);
+    flex-direction: column;
+    gap: var(--e-5);
+    background: rgba(247, 248, 249, 0.82);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid var(--fio);
+}
+
+/*
+ * A marca ocupa exatamente a altura do cabeçalho ao lado. Sem isso, o logo
+ * flutua alguns pixels acima ou abaixo da linha do topo — o tipo de desalinho
+ * que ninguém aponta e todo mundo sente.
+ */
+.lateral__marca {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    min-height: var(--topo-altura);
+    padding-inline: var(--e-3);
+}
+
+.lateral__marca img {
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 7px;
+}
+
+.lateral__marca-texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+}
+
+.lateral__marca-texto strong {
+    font-size: 0.9375rem;
+    font-weight: 650;
+    letter-spacing: -0.014em;
+}
+
+.lateral__marca-texto small {
+    font-size: 0.75rem;
+    color: var(--tinta-fraca);
+    letter-spacing: -0.004em;
+}
+
+.lateral__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.lateral__grupo {
+    padding-inline: var(--e-3);
+    margin-bottom: var(--e-3);
+}
+
+/*
+ * Item de menu sem caixa. O selecionado se distingue por tinta cheia, peso e
+ * um traço curto na margem — o suficiente para ser inequívoco e discreto.
+ */
+.lateral__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    min-height: 2.5rem;
+    padding: 0 var(--e-3);
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: -0.012em;
+    color: var(--tinta-media);
+    transition: color 200ms ease, background-color 200ms ease;
+}
+
+.lateral__item svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+    opacity: 0.75;
+    transition: opacity 200ms ease, color 200ms ease;
+}
+
+.lateral__item:hover {
+    color: var(--tinta);
+    background: rgba(16, 20, 24, 0.04);
+}
+
+.lateral__item[data-ativo='true'] {
+    color: var(--tinta);
+    font-weight: 600;
+}
+
+.lateral__item[data-ativo='true'] svg {
+    color: var(--acento);
+    opacity: 1;
+}
+
+.lateral__item[data-ativo='true']::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--e-3) * -1 + 2px);
+    top: 50%;
+    width: 3px;
+    height: 1.125rem;
+    border-radius: 2px;
+    background: var(--acento);
+    transform: translateY(-50%);
+}
+
+.lateral__pe {
+    margin-top: auto;
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--fio);
+}
+
+.perfil {
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    padding: var(--e-2) var(--e-3);
+}
+
+.perfil__iniciais {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--marca);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+}
+
+.perfil__texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    min-width: 0;
+}
+
+.perfil__texto strong {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.perfil__texto small {
+    font-size: 0.75rem;
+    color: var(--tinta-fraca);
+}
+
+/* ============================================================
+   Cabeçalho
+   ============================================================ */
+
+.quadro {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+}
+
+.topo {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: var(--e-3);
+    min-height: var(--topo-altura);
+    padding-inline: var(--goteira-app);
+    background: var(--vidro);
+    backdrop-filter: var(--desfoque-chrome);
+    /* O fio não é permanente: ele aparece quando existe conteúdo por baixo. */
+    box-shadow: 0 1px 0 0 transparent;
+    transition: box-shadow 260ms ease;
+}
+
+.topo[data-rolado='true'] {
+    box-shadow: 0 1px 0 0 var(--fio);
+}
+
+.topo__secao {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.014em;
+    color: var(--tinta);
+    /* Cabe no espaço que sobrar; nome longo de cliente não empurra a busca. */
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.topo__acoes {
+    display: flex;
+    align-items: center;
+    gap: var(--e-1);
+    margin-left: auto;
+}
+
+/* ============================================================
+   Busca global
+   ============================================================ */
+
+.busca {
+    position: relative;
+    display: none;
+    flex: 1;
+    max-width: 26rem;
+    margin-inline: auto;
+}
+
+.busca__campo {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    width: 100%;
+    height: 2.375rem;
+    padding-inline: var(--e-3);
+    border-radius: var(--r-campo);
+    background: rgba(16, 20, 24, 0.05);
+    transition: background-color 220ms ease, box-shadow 220ms ease;
+}
+
+.busca__campo:focus-within {
+    background: var(--branco);
+    box-shadow: 0 0 0 1px var(--fio-forte), 0 0 0 4px var(--acento-tenue);
+}
+
+.busca__icone {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    color: var(--tinta-fraca);
+}
+
+.busca__entrada {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.875rem;
+    letter-spacing: -0.008em;
+    color: var(--tinta);
+    appearance: none;
+}
+
+.busca__entrada::placeholder {
+    color: var(--tinta-fraca);
+}
+
+.busca__entrada:focus {
+    outline: none;
+}
+
+.busca__entrada::-webkit-search-cancel-button {
+    appearance: none;
+}
+
+.busca__atalho {
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+    border-radius: 5px;
+    background: rgba(16, 20, 24, 0.06);
+    font-family: inherit;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--tinta-fraca);
+}
+
+.busca__campo:focus-within .busca__atalho {
+    opacity: 0;
+}
+
+.busca__cancelar {
+    display: none;
+    padding: var(--e-2);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--acento);
+}
+
+/* Painel de resultados: uma camada sobre o conteúdo, então tem sombra. */
+.busca__resultados {
+    position: absolute;
+    top: calc(100% + var(--e-2));
+    left: 0;
+    right: 0;
+    z-index: 50;
+    max-height: min(28rem, 70vh);
+    overflow-y: auto;
+    padding: var(--e-3);
+    border-radius: 16px;
+    background: var(--branco);
+    border: 1px solid var(--fio);
+    box-shadow: var(--sombra-chrome);
+    animation: surgir 220ms var(--curva-saida);
+}
+
+@keyframes surgir {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.99);
+    }
+}
+
+.resultados__grupo + .resultados__grupo {
+    margin-top: var(--e-4);
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--fio);
+}
+
+.resultados__grupo .rotulo {
+    padding-inline: var(--e-3);
+    margin-bottom: var(--e-2);
+}
+
+.resultado {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--e-3);
+    border-radius: 10px;
+    transition: background-color 160ms ease;
+}
+
+.resultado:hover,
+.resultado:focus-visible {
+    background: rgba(16, 20, 24, 0.04);
+}
+
+.resultado__nome {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.014em;
+}
+
+.resultado__leve {
+    font-weight: 450;
+    color: var(--tinta-media);
+}
+
+.resultado__apoio {
+    font-size: 0.8125rem;
+    color: var(--tinta-fraca);
+}
+
+.resultados__vazio {
+    margin: 0;
+    padding: var(--e-4);
+    font-size: 0.875rem;
+    color: var(--tinta-fraca);
+}
+
+/* ============================================================
+   Avisos
+   ============================================================ */
+
+.avisos {
+    position: fixed;
+    z-index: 60;
+    top: calc(var(--topo-altura) + var(--e-2));
+    right: var(--goteira-app);
+    width: min(22rem, calc(100vw - var(--e-6)));
+    max-height: min(30rem, 70vh);
+    overflow-y: auto;
+    padding: var(--e-4);
+    border-radius: 18px;
+    background: var(--branco);
+    border: 1px solid var(--fio);
+    box-shadow: var(--sombra-chrome);
+    animation: surgir 240ms var(--curva-saida);
+}
+
+.avisos__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--e-3);
+}
+
+.avisos__titulo {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 650;
+    letter-spacing: -0.016em;
+}
+
+.avisos__lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.aviso {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: var(--e-3);
+    border-radius: 12px;
+    text-align: left;
+    transition: background-color 160ms ease;
+}
+
+.aviso:hover {
+    background: rgba(16, 20, 24, 0.04);
+}
+
+.aviso + .aviso {
+    border-top: 1px solid var(--fio);
+    border-radius: 0;
+}
+
+.aviso__titulo {
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--tinta-fraca);
+}
+
+.aviso[data-tipo='atrasada'] .aviso__titulo {
+    color: var(--tom-ruim);
+}
+
+.aviso[data-tipo='agora'] .aviso__titulo {
+    color: var(--acento);
+}
+
+.aviso__cliente {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.014em;
+    color: var(--tinta);
+}
+
+.aviso__apoio {
+    font-size: 0.8125rem;
+    color: var(--tinta-media);
+}
+
+/* ============================================================
+   Navegação do celular
+   ============================================================ */
+
+.barra {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--vidro);
+    backdrop-filter: var(--desfoque-chrome);
+    border-top: 1px solid var(--fio);
+}
+
+.barra__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    /* Alvo de toque cheio: a coluna inteira, não só o ícone. */
+    min-height: var(--barra-altura);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: -0.004em;
+    color: var(--tinta-fraca);
+    transition: color 200ms ease;
+}
+
+.barra__item svg {
+    width: 1.375rem;
+    height: 1.375rem;
+    transition: transform 260ms var(--curva-saida);
+}
+
+.barra__item[data-ativo='true'] {
+    color: var(--acento);
+    font-weight: 600;
+}
+
+.barra__item:active svg {
+    transform: scale(0.9);
+}
+
+/* ============================================================
+   Área de conteúdo
+   ============================================================ */
+
+.tela {
+    flex: 1;
+    width: 100%;
+    max-width: calc(var(--larg-tela) + var(--goteira-app) * 2);
+    margin-inline: auto;
+    padding: var(--e-6) var(--goteira-app) calc(var(--barra-altura) + var(--e-8));
+}
+
+/*
+ * Cabeça de tela: título grande, uma frase de contexto e a ação principal.
+ * É a mesma composição em Clientes, Equipamentos e Visitas — o que muda é o
+ * texto, e é justamente essa repetição que faz o sistema parecer um sistema.
+ */
+.pagina {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--e-4);
+    margin-bottom: var(--e-7);
+}
+
+.pagina__texto {
+    max-width: 34rem;
+}
+
+.pagina__titulo {
+    font-family: var(--fonte-display);
+    font-size: var(--t-display);
+    line-height: 1.02;
+    letter-spacing: var(--tr-display);
+    font-weight: 700;
+    margin: 0;
+}
+
+/*
+ * O texto de apoio não é legenda: junto com o título ele forma o bloco
+ * editorial que abre a tela. Por isso tem corpo maior que texto de interface e
+ * entrelinha de leitura, não de rótulo.
+ */
+.pagina__sub {
+    margin: var(--e-4) 0 0;
+    font-size: clamp(1.0625rem, 1.4vw, 1.3125rem);
+    line-height: 1.4;
+    letter-spacing: -0.016em;
+    color: var(--tinta-media);
+    text-wrap: pretty;
+    max-width: 28ch;
+}
+
+.pagina__acoes {
+    display: flex;
+    gap: var(--e-2);
+}
+
+/* Seção interna de uma tela: rótulo, título e o conteúdo abaixo. */
+.secao {
+    margin-top: var(--pilha);
+}
+
+.secao__cabeca {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--e-3);
+    margin-bottom: var(--e-5);
+}
+
+.secao__titulo {
+    margin: 0;
+    font-family: var(--fonte-display);
+    font-size: var(--t-titulo);
+    line-height: 1.1;
+    letter-spacing: var(--tr-titulo);
+    font-weight: 700;
+}
+
+.secao__apoio {
+    margin: var(--e-2) 0 0;
+    font-size: 0.9375rem;
+    color: var(--tinta-media);
+}
+
+/* ============================================================
+   Desktop
+   ============================================================ */
+
+@media (min-width: 64rem) {
+    .lateral {
+        display: flex;
+    }
+
+    .quadro {
+        margin-left: var(--lateral);
+    }
+
+    .busca {
+        display: block;
+    }
+
+    .barra {
+        display: none;
+    }
+
+    .topo__lupa {
+        display: none;
+    }
+
+    /* No desktop o cabeçalho é a única indicação de contexto no topo da
+       coluna: ele fica sempre visível, independente da rolagem. */
+    .topo__secao {
+        flex: 0 1 12rem;
+        opacity: 1;
+    }
+
+    .tela {
+        padding-block: var(--e-7) var(--e-10);
+    }
+}
+
+/* ============================================================
+   Celular
+   ============================================================ */
+
+@media (max-width: 63.99rem) {
+    /*
+     * Título grande à mostra, cabeçalho sem texto. Quando o título rola para
+     * fora, o nome sobe para o topo — a troca é o que dá continuidade à tela
+     * sem duplicar a mesma palavra em duas alturas.
+     */
+    .topo__secao {
+        opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 260ms var(--curva-saida), transform 260ms var(--curva-saida);
+    }
+
+    .topo__secao[data-visivel='true'] {
+        opacity: 1;
+        transform: none;
+    }
+
+    /*
+     * A busca no celular não é um campo no cabeçalho: é uma tela. A lupa
+     * levanta a mesma caixa em tela cheia, com o teclado subindo junto — o
+     * gesto que qualquer aplicativo do aparelho já ensinou.
+     */
+    .app[data-busca='aberta'] .busca {
+        display: flex;
+        align-items: center;
+        gap: var(--e-2);
+        position: fixed;
+        inset: 0 0 auto 0;
+        z-index: 70;
+        max-width: none;
+        margin: 0;
+        padding: var(--e-3) var(--e-4);
+        padding-top: max(var(--e-3), env(safe-area-inset-top));
+        background: var(--branco);
+        border-bottom: 1px solid var(--fio);
+        animation: descer 260ms var(--curva-saida);
+    }
+
+    @keyframes descer {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+    }
+
+    .app[data-busca='aberta'] .busca__campo {
+        height: 2.75rem;
+    }
+
+    .app[data-busca='aberta'] .busca__cancelar {
+        display: block;
+        flex: none;
+    }
+
+    .app[data-busca='aberta'] .busca__atalho {
+        display: none;
+    }
+
+    .app[data-busca='aberta'] .busca__resultados {
+        position: fixed;
+        top: 4.5rem;
+        left: 0;
+        right: 0;
+        max-height: calc(100dvh - 4.5rem);
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: var(--e-4);
+    }
+
+    /* Enquanto a busca ocupa a tela, o conteúdo atrás não deve piscar. */
+    .app[data-busca='aberta'] .topo {
+        visibility: hidden;
+    }
+
+    .avisos {
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: auto;
+        max-height: 74dvh;
+        padding: var(--e-5) var(--e-4) calc(var(--e-5) + env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: var(--r-folha) var(--r-folha) 0 0;
+        box-shadow: 0 -8px 40px rgba(16, 20, 24, 0.18);
+        animation: subir-folha 320ms var(--curva-saida);
+    }
+
+    @keyframes subir-folha {
+        from {
+            transform: translateY(100%);
+        }
+    }
+
+    .avisos__titulo {
+        font-size: 1.125rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .busca__resultados,
+    .avisos {
+        animation: none;
+    }
+}

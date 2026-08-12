@@ -1,0 +1,54 @@
+    <a class="voltar" href="/sistema/clientes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-seta"/></svg>
+        Clientes
+    </a>
+
+    <!-- O cabeçalho da ficha é montado por cliente.js a partir do id da URL. -->
+    <header class="ficha" data-ficha>
+        <div class="esqueleto" style="border: 0;">
+            <div class="esqueleto__linha esqueleto__linha--titulo" style="max-width: 22rem;"></div>
+            <div class="esqueleto__linha esqueleto__linha--curta"></div>
+        </div>
+    </header>
+
+    <section class="secao" data-secao-equipamentos hidden>
+        <div class="secao__cabeca">
+            <div>
+                <h2 class="secao__titulo">Equipamentos</h2>
+                <p class="secao__apoio" data-equipamentos-apoio></p>
+            </div>
+            <button class="elo-seta" type="button" data-abrir="equipamento" data-cliente="" data-adicionar>
+                Adicionar
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mais"/></svg>
+            </button>
+        </div>
+
+        <div data-lista="equipamentos"></div>
+    </section>
+
+    <section class="secao" data-secao-visitas hidden>
+        <div class="secao__cabeca">
+            <div>
+                <h2 class="secao__titulo">Próximas visitas</h2>
+                <p class="secao__apoio" data-visitas-apoio></p>
+            </div>
+        </div>
+
+        <div data-lista="visitas"></div>
+    </section>
+
+    <section class="secao" data-secao-dados hidden>
+        <div class="secao__cabeca">
+            <h2 class="secao__titulo">Dados cadastrais</h2>
+        </div>
+
+        <dl class="dados" data-lista="dados"></dl>
+    </section>
+
+    <section class="secao" data-secao-historico hidden>
+        <div class="secao__cabeca">
+            <h2 class="secao__titulo">Histórico</h2>
+        </div>
+
+        <div data-lista="historico"></div>
+    </section>

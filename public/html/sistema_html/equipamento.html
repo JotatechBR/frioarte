@@ -1,0 +1,42 @@
+    <a class="voltar" href="/sistema/equipamentos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-seta"/></svg>
+        Equipamentos
+    </a>
+
+    <!-- Montado por equipamento.js a partir do código na URL. -->
+    <header class="maquina" data-maquina>
+        <div class="esqueleto" style="border: 0;">
+            <div class="esqueleto__linha esqueleto__linha--curta" style="max-width: 7rem;"></div>
+            <div class="esqueleto__linha esqueleto__linha--titulo" style="max-width: 20rem;"></div>
+        </div>
+    </header>
+
+    <section class="secao" data-secao-ficha hidden>
+        <div class="secao__cabeca">
+            <h2 class="secao__titulo">Ficha técnica</h2>
+        </div>
+
+        <dl class="dados" data-lista="ficha"></dl>
+    </section>
+
+    <section class="secao" data-secao-visitas hidden>
+        <div class="secao__cabeca">
+            <div>
+                <h2 class="secao__titulo">Próximas visitas</h2>
+                <p class="secao__apoio" data-visitas-apoio></p>
+            </div>
+        </div>
+
+        <div data-lista="visitas"></div>
+    </section>
+
+    <section class="secao" data-secao-historico hidden>
+        <div class="secao__cabeca">
+            <div>
+                <h2 class="secao__titulo">Histórico do equipamento</h2>
+                <p class="secao__apoio">Da instalação até o último atendimento.</p>
+            </div>
+        </div>
+
+        <div data-lista="historico"></div>
+    </section>

@@ -61,6 +61,57 @@ frio arte/
         └── frioarte-og.jpg         1200×630, prévia do link (gerada pelo script)
 ```
 
+## Sistema interno (`/sistema`)
+
+Ferramenta de trabalho da equipe: clientes, equipamentos instalados e visitas
+técnicas. Vive no mesmo monólito, com a mesma linguagem visual do site em escala
+de aplicação.
+
+**Nesta etapa não existe banco de dados.** Tudo vem de dados simulados em
+`public/js/sistema_js/data/`, e toda a interface conversa com `dados.js`, que é
+a única peça do frontend que sabe de onde os dados vêm. Quando a API existir,
+troca-se o miolo dessas funções por `fetch('/api/clientes')` e nenhuma tela
+muda.
+
+```text
+public/html/sistema_html/
+├── layout.html          Chrome do sistema (lateral, cabeçalho, folhas) — uma vez só
+├── painel.html          Miolo de cada tela; api/paginas_sistema.js compõe layout + miolo
+├── clientes.html · cliente.html
+├── equipamentos.html · equipamento.html
+└── visitas.html
+
+public/js/sistema_js/
+├── data/*.mock.js       Clientes, equipamentos, visitas e equipe
+├── formato.js           Datas, máscaras, "instalado há 1 ano e 4 meses"
+├── dados.js             Camada de dados: consultas, junções, gravação (a fronteira da API)
+├── interface.js         Estados, esqueleto, folhas, avisos, validação
+├── cartoes.js           Visita, equipamento, cliente e histórico — usados por várias telas
+├── formularios.js       Os três cadastros e o detalhe da visita
+├── navegacao.js         Navegação, perfil, busca global e sino
+└── painel|clientes|cliente|equipamentos|equipamento|visitas.js
+```
+
+| Rota                             | Tela                             |
+| -------------------------------- | -------------------------------- |
+| `/sistema`                       | Painel — agenda e pendências     |
+| `/sistema/clientes`              | Lista com busca e filtros        |
+| `/sistema/clientes/:id`          | Ficha do cliente                 |
+| `/sistema/equipamentos`          | Lista com busca e filtros        |
+| `/sistema/equipamentos/:codigo`  | Ficha da máquina (`FA-000028`)   |
+| `/sistema/visitas`               | Agenda por período               |
+
+Detalhes que valem saber:
+
+- **Datas das visitas são relativas a hoje** (`visitas.mock.js`). Datas fixas
+  fariam a agenda envelhecer e o painel esvaziar em uma semana.
+- **Nada é escrito à mão que possa ser calculado**: tempo de instalação,
+  atraso, "em 30 minutos", próxima visita e os avisos do sino saem todos das
+  datas.
+- **O que se cadastra durante a sessão** fica em `sessionStorage`, só as
+  alterações — sobrevive à navegação entre telas e some ao fechar a aba.
+- O sistema está fora do `sitemap.xml` e barrado no `robots.txt`.
+
 ## Fluxo da página
 
 ```text
@@ -107,6 +158,7 @@ propósito: a quebra de linha faz parte da composição, não do texto.
 | Método | Rota            | Retorno                                   |
 | ------ | --------------- | ----------------------------------------- |
 | GET    | `/`             | Home, com o bloco de SEO injetado          |
+| GET    | `/sistema/*`    | Sistema interno (ver seção acima)         |
 | GET    | `/api/frioarte` | `{ sucesso: true, dados: { ...perfil } }` |
 | GET    | `/robots.txt`   | Gerado a partir do domínio nos dados      |
 | GET    | `/sitemap.xml`  | Uma entrada; `lastmod` = data do conteúdo |
@@ -175,6 +227,9 @@ Se um dia for preciso guardar os pedidos, o caminho é criar `api/rota_orcamento
 com repository e uma tabela — a estrutura do projeto já comporta.
 
 ## Pendências
+
+- **Segunda etapa do sistema interno.** Banco, API, autenticação e persistência
+  real. A interface já está preparada: as telas só falam com `dados.js`.
 
 - **Fotografia.** Todas as imagens do site são geradas por IA, usadas como
   referência de ambiente com o aval da empresa. Os itens de `projetos` carregam

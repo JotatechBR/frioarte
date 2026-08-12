@@ -1,0 +1,38 @@
+    <div class="pagina">
+        <div class="pagina__texto">
+            <h1 class="pagina__titulo" data-titulo>Visitas técnicas</h1>
+            <p class="pagina__sub">
+                A agenda da equipe: o que é hoje, o que vem
+                e o que já foi feito.
+            </p>
+        </div>
+
+        <div class="pagina__acoes">
+            <button class="botao botao--primario" type="button" data-abrir="visita" data-pressionavel>
+                <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mais"/></svg>
+                Nova visita
+            </button>
+        </div>
+    </div>
+
+    <div class="controles">
+        <label class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+            <input type="search" data-procurar autocomplete="off"
+                   placeholder="Cliente, telefone, tipo de atendimento ou código FA"
+                   aria-label="Buscar visitas">
+        </label>
+
+        <nav class="filtros" data-filtros aria-label="Filtrar visitas">
+            <button class="filtro" type="button" data-filtro="hoje" data-ativo="true">Hoje</button>
+            <button class="filtro" type="button" data-filtro="semana">Esta semana</button>
+            <button class="filtro" type="button" data-filtro="proximas">Próximas</button>
+            <button class="filtro" type="button" data-filtro="concluidas">Concluídas</button>
+            <button class="filtro" type="button" data-filtro="canceladas">Canceladas</button>
+            <button class="filtro" type="button" data-filtro="todas">Todas</button>
+        </nav>
+    </div>
+
+    <p class="contagem" data-contagem aria-live="polite"></p>
+
+    <div data-lista="visitas"></div>

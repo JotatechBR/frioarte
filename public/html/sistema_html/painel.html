@@ -1,0 +1,55 @@
+    <!--
+      Abertura. Uma informação manda na primeira tela: quantas visitas existem
+      hoje. Tudo o mais é apoio, e por isso é menor.
+    -->
+    <section class="abertura" data-revelar="subir">
+        <p class="abertura__saudacao" data-saudacao></p>
+
+        <h1 class="abertura__frase" data-frase data-titulo>
+            <span class="esqueleto__linha esqueleto__linha--titulo" style="max-width: 20rem;"></span>
+        </h1>
+
+        <p class="abertura__data" data-data></p>
+
+        <div class="abertura__acoes">
+            <button class="botao botao--primario" type="button" data-abrir="visita" data-pressionavel>
+                Agendar visita
+            </button>
+            <a class="botao botao--secundario" href="/sistema/visitas" data-pressionavel>Ver agenda</a>
+        </div>
+    </section>
+
+    <!-- Números da operação, sem uma caixa em volta de cada um. -->
+    <section class="resumo" data-revelar="subir">
+        <div class="numeros" data-lista="resumo"></div>
+    </section>
+
+    <section class="secao" data-revelar="subir">
+        <div class="secao__cabeca">
+            <div>
+                <h2 class="secao__titulo">Agenda</h2>
+                <p class="secao__apoio">Tudo que está em aberto, do mais urgente ao mais distante.</p>
+            </div>
+            <a class="elo-seta" href="/sistema/visitas">
+                Todas as visitas
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-seta"/></svg>
+            </a>
+        </div>
+
+        <div data-lista="agenda"></div>
+    </section>
+
+    <section class="secao" data-revelar="subir">
+        <div class="secao__cabeca">
+            <div>
+                <h2 class="secao__titulo">Pede atenção</h2>
+                <p class="secao__apoio">Equipamentos parados, com manutenção vencida ou próxima do prazo.</p>
+            </div>
+            <a class="elo-seta" href="/sistema/equipamentos?filtro=manutencao">
+                Ver equipamentos
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-seta"/></svg>
+            </a>
+        </div>
+
+        <div data-lista="manutencao"></div>
+    </section>

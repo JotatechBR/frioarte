@@ -1,0 +1,31 @@
+/*
+ * Visitas técnicas.
+ *
+ * A tela é quase toda feita de peças compartilhadas — a agenda e o cartão de
+ * visita moram em componentes.css. O que sobra aqui é o ritmo próprio desta
+ * lista: ela é longa, então os grupos precisam de mais ar entre si do que no
+ * painel, onde só aparecem as oito primeiras.
+ */
+
+.grupo + .grupo {
+    margin-top: var(--e-8);
+}
+
+/*
+ * Cabeça de grupo grudada no topo enquanto a lista rola: ao percorrer trinta
+ * visitas, "HOJE" ou "PRÓXIMOS DIAS" continua visível e o contexto não se
+ * perde no meio da rolagem.
+ */
+.grupo__cabeca {
+    position: sticky;
+    top: var(--topo-altura);
+    z-index: 10;
+    background: var(--branco);
+    padding-top: var(--e-3);
+}
+
+@media (max-width: 47.99rem) {
+    .grupo + .grupo {
+        margin-top: var(--e-7);
+    }
+}

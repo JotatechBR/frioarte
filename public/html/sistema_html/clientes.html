@@ -1,0 +1,37 @@
+    <div class="pagina">
+        <div class="pagina__texto">
+            <h1 class="pagina__titulo" data-titulo>Clientes</h1>
+            <p class="pagina__sub">
+                Quem a Frio Arte atende, onde estão as máquinas
+                e quando é a próxima visita.
+            </p>
+        </div>
+
+        <div class="pagina__acoes">
+            <button class="botao botao--primario" type="button" data-abrir="cliente" data-pressionavel>
+                <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mais"/></svg>
+                Novo cliente
+            </button>
+        </div>
+    </div>
+
+    <div class="controles">
+        <label class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+            <input type="search" data-procurar autocomplete="off"
+                   placeholder="Nome, telefone, CPF/CNPJ ou endereço"
+                   aria-label="Buscar clientes">
+        </label>
+
+        <nav class="filtros" data-filtros aria-label="Filtrar clientes">
+            <button class="filtro" type="button" data-filtro="todos" data-ativo="true">Todos</button>
+            <button class="filtro" type="button" data-filtro="ativos">Ativos</button>
+            <button class="filtro" type="button" data-filtro="agendados">Com visita agendada</button>
+            <button class="filtro" type="button" data-filtro="atencao">Com equipamento em atenção</button>
+            <button class="filtro" type="button" data-filtro="sem-equipamento">Sem equipamento</button>
+        </nav>
+    </div>
+
+    <p class="contagem" data-contagem aria-live="polite"></p>
+
+    <div data-lista="clientes"></div>

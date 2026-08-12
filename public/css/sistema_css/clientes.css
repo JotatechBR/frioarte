@@ -1,0 +1,93 @@
+/*
+ * Clientes — lista e ficha.
+ *
+ * A ficha é o "hero interno" do sistema: nome grande, uma linha de contexto,
+ * contato e as ações que importam. Sem cartão em volta, sem foto de perfil
+ * inventada, sem caixa cinza — o nome já é o suficiente para ancorar a tela.
+ */
+
+/* ---------- Ficha ---------- */
+
+.ficha {
+    padding-bottom: var(--e-7);
+    border-bottom: 1px solid var(--fio);
+}
+
+.ficha__nome {
+    margin: 0;
+    font-family: var(--fonte-display);
+    font-size: var(--t-mega);
+    line-height: 1;
+    letter-spacing: var(--tr-mega);
+    font-weight: 700;
+    text-wrap: balance;
+    max-width: 18ch;
+}
+
+.ficha__desde {
+    margin: var(--e-4) 0 0;
+    font-size: var(--t-sub);
+    letter-spacing: -0.012em;
+    color: var(--tinta-media);
+}
+
+.ficha__contato {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-2) var(--e-3);
+    margin: var(--e-5) 0 0;
+    font-size: 1.0625rem;
+    letter-spacing: -0.012em;
+    color: var(--tinta-media);
+}
+
+.ficha__telefone {
+    color: var(--tinta);
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--fio-forte);
+    transition: border-color 200ms ease;
+}
+
+.ficha__telefone:hover {
+    border-color: var(--tinta);
+}
+
+.ficha__separador {
+    color: var(--fio-forte);
+}
+
+.ficha__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2);
+    margin-top: var(--e-6);
+}
+
+/* ---------- Celular ----------
+   A ficha é a tela que o técnico abre na casa do cliente. As ações precisam
+   caber no polegar, então elas ocupam a largura e ficam logo abaixo do nome. */
+
+@media (max-width: 47.99rem) {
+    .ficha__acoes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--e-2);
+    }
+
+    .ficha__acoes .botao {
+        width: 100%;
+        min-height: 3rem;
+        padding-inline: var(--e-3);
+        font-size: 0.9375rem;
+    }
+
+    /* WhatsApp é a ação principal: ocupa a linha inteira. */
+    .ficha__acoes .botao--primario {
+        grid-column: 1 / -1;
+    }
+
+    .ficha__nome {
+        max-width: none;
+    }
+}

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{titulo}} · Frio Arte</title>
+
+    <!-- Ferramenta de trabalho: não é conteúdo de busca. -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="color-scheme" content="light only">
+
+    <link rel="icon" href="/midias/frioarte-simbolo.png" type="image/png">
+    <link rel="apple-touch-icon" href="/midias/frioarte-simbolo.png">
+
+    <link rel="stylesheet" href="/css/shared/variaveis.css">
+    <link rel="stylesheet" href="/css/shared/base.css">
+    <link rel="stylesheet" href="/css/sistema_css/sistema.css">
+    <link rel="stylesheet" href="/css/sistema_css/componentes.css">
+    <link rel="stylesheet" href="{{estilo}}">
+
+    <script>
+        /*
+         * Estado inicial da revelação antes da primeira pintura. A rede de
+         * segurança é o timeout: se o script de revelação não subir, a marca cai
+         * sozinha e nada fica invisível.
+         */
+        (function () {
+            var raiz = document.documentElement;
+            raiz.dataset.cena = '';
+            setTimeout(function () {
+                if (raiz.dataset.cenaPronta !== 'true') delete raiz.dataset.cena;
+            }, 2500);
+        })();
+    </script>
+</head>
+<body class="app" data-secao="{{secao}}">
+
+<!-- Ícones do sistema, definidos uma vez e usados por <use> ------------------>
+<svg class="apenas-leitor" aria-hidden="true" focusable="false">
+    <defs>
+        <g id="i-painel" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+            <rect x="3.5" y="3.5" width="7" height="9" rx="2"/>
+            <rect x="13.5" y="3.5" width="7" height="5" rx="2"/>
+            <rect x="3.5" y="16.5" width="7" height="4" rx="2"/>
+            <rect x="13.5" y="12.5" width="7" height="8" rx="2"/>
+        </g>
+        <g id="i-clientes" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="10" cy="8" r="3.4"/>
+            <path d="M3.8 20c0-3.2 2.8-5.2 6.2-5.2s6.2 2 6.2 5.2"/>
+            <path d="M17 5.6a3 3 0 0 1 .6 5.8"/>
+        </g>
+        <g id="i-equipamentos" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="5.5" width="18" height="7" rx="2.2"/>
+            <path d="M6.5 9.2h11"/>
+            <path d="M7.5 16.4c1.6 0 1.6 2 3.2 2M13.3 16.4c1.6 0 1.6 2 3.2 2"/>
+        </g>
+        <g id="i-visitas" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <rect x="3.5" y="5" width="17" height="15.5" rx="3"/>
+            <path d="M8 3.2v3.6M16 3.2v3.6M3.5 10.2h17"/>
+        </g>
+        <g id="i-busca" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <circle cx="11" cy="11" r="6.4"/>
+            <path d="M15.8 15.8L20 20"/>
+        </g>
+        <g id="i-sino" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 15.5v-4.2a6 6 0 1 0-12 0v4.2L4.5 18.4h15z"/>
+            <path d="M10 21h4"/>
+        </g>
+        <g id="i-seta" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h13M12.5 6l6 6-6 6"/>
+        </g>
+        <g id="i-mais" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M12 5.5v13M5.5 12h13"/>
+        </g>
+        <g id="i-fechar" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+            <path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>
+        </g>
+        <g id="i-telefone" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6.2 3.8h3l1.5 4-2 1.4a11 11 0 0 0 5.1 5.1l1.4-2 4 1.5v3a1.8 1.8 0 0 1-2 1.8C10.6 18.2 5.8 13.4 4.4 5.8a1.8 1.8 0 0 1 1.8-2z"/>
+        </g>
+        <g id="i-conversa" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.5 11.5c0 4.1-3.8 7.4-8.5 7.4-1.1 0-2.2-.2-3.2-.5l-4.8 1.4 1.5-4.2a7 7 0 0 1-1.5-4.1c0-4.1 3.8-7.4 8.5-7.4s8 3.3 8 7.4z"/>
+        </g>
+        <g id="i-local" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21c4.2-4.4 6.3-7.7 6.3-10.3A6.3 6.3 0 0 0 5.7 10.7C5.7 13.3 7.8 16.6 12 21z"/>
+            <circle cx="12" cy="10.4" r="2.4"/>
+        </g>
+        <g id="i-relogio" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="12" cy="12" r="8.3"/>
+            <path d="M12 7.4V12l3 1.8"/>
+        </g>
+    </defs>
+</svg>
+
+<a class="apenas-leitor" href="#conteudo">Pular para o conteúdo</a>
+
+<!-- Barra lateral (desktop) ------------------------------------------------->
+<aside class="lateral">
+    <a class="lateral__marca" href="/sistema">
+        <img src="/midias/frioarte-simbolo.png" alt="" width="30" height="30">
+        <span class="lateral__marca-texto">
+            <strong>Frio Arte</strong>
+            <small>Sistema interno</small>
+        </span>
+    </a>
+
+    <nav class="lateral__nav" aria-label="Seções do sistema">
+        <p class="rotulo lateral__grupo">Operação</p>
+
+        <a class="lateral__item" href="/sistema" data-nav="painel">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-painel"/></svg>
+            Visão geral
+        </a>
+        <a class="lateral__item" href="/sistema/clientes" data-nav="clientes">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clientes"/></svg>
+            Clientes
+        </a>
+        <a class="lateral__item" href="/sistema/equipamentos" data-nav="equipamentos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-equipamentos"/></svg>
+            Equipamentos
+        </a>
+        <a class="lateral__item" href="/sistema/visitas" data-nav="visitas">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-visitas"/></svg>
+            Visitas
+        </a>
+    </nav>
+
+    <div class="lateral__pe">
+        <div class="perfil">
+            <span class="perfil__iniciais" data-usuario-iniciais aria-hidden="true"></span>
+            <span class="perfil__texto">
+                <strong data-usuario-nome></strong>
+                <small data-usuario-funcao></small>
+            </span>
+        </div>
+    </div>
+</aside>
+
+<div class="quadro">
+
+    <!-- Cabeçalho ---------------------------------------------------------->
+    <header class="topo" data-topo>
+        <!--
+          No celular este título só aparece quando o título grande da tela sai
+          de vista — senão ele seria a segunda cópia da mesma palavra a 40px de
+          distância. No desktop ele é fixo: lá ele situa, não repete.
+        -->
+        <p class="topo__secao" data-visivel="false">{{titulo}}</p>
+
+        <div class="busca" data-busca>
+            <div class="busca__campo">
+                <svg class="busca__icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+                <input class="busca__entrada" type="search" data-busca-entrada
+                       placeholder="Buscar cliente, equipamento, telefone…"
+                       aria-label="Busca no sistema" autocomplete="off"
+                       role="combobox" aria-expanded="false" aria-controls="busca-resultados">
+                <kbd class="busca__atalho" aria-hidden="true">/</kbd>
+            </div>
+
+            <button class="busca__cancelar" type="button" data-busca-fechar>Cancelar</button>
+
+            <div class="busca__resultados" id="busca-resultados" data-busca-resultados hidden></div>
+        </div>
+
+        <div class="topo__acoes">
+            <button class="icone-botao topo__lupa" type="button" data-busca-abrir aria-label="Buscar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+            </button>
+
+            <button class="icone-botao" type="button" data-avisos-abrir aria-label="Avisos" aria-expanded="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sino"/></svg>
+                <span class="icone-botao__marca" data-avisos-marca hidden></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="tela" id="conteudo">
+        {{conteudo}}
+    </main>
+</div>
+
+<!-- Navegação do celular ---------------------------------------------------->
+<nav class="barra" aria-label="Navegação principal">
+    <a class="barra__item" href="/sistema" data-nav="painel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-painel"/></svg>
+        <span>Início</span>
+    </a>
+    <a class="barra__item" href="/sistema/clientes" data-nav="clientes">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clientes"/></svg>
+        <span>Clientes</span>
+    </a>
+    <a class="barra__item" href="/sistema/equipamentos" data-nav="equipamentos">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-equipamentos"/></svg>
+        <span>Máquinas</span>
+    </a>
+    <a class="barra__item" href="/sistema/visitas" data-nav="visitas">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-visitas"/></svg>
+        <span>Visitas</span>
+    </a>
+</nav>
+
+<!-- Avisos ------------------------------------------------------------------>
+<div class="avisos" data-avisos hidden>
+    <header class="avisos__topo">
+        <h2 class="avisos__titulo">Avisos</h2>
+        <button class="icone-botao" type="button" data-avisos-fechar aria-label="Fechar avisos">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fechar"/></svg>
+        </button>
+    </header>
+    <div class="avisos__lista" data-avisos-lista></div>
+</div>
+
+<!-- Cadastro de cliente ----------------------------------------------------->
+<dialog class="folha" data-dialogo="cliente" aria-labelledby="titulo-forma-cliente">
+    <form class="folha__painel forma" data-forma="cliente" novalidate>
+        <header class="folha__topo">
+            <div>
+                <p class="rotulo" data-forma-rotulo>Cadastro</p>
+                <h2 class="folha__nome" id="titulo-forma-cliente" data-forma-titulo>Novo cliente</h2>
+            </div>
+            <button class="icone-botao" type="button" data-fechar aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fechar"/></svg>
+            </button>
+        </header>
+
+        <div class="folha__corpo">
+            <input type="hidden" name="id">
+
+            <div class="alternador" role="radiogroup" aria-label="Tipo de cliente">
+                <label class="alternador__opcao">
+                    <input type="radio" name="tipo" value="pessoa" checked>
+                    <span>Pessoa física</span>
+                </label>
+                <label class="alternador__opcao">
+                    <input type="radio" name="tipo" value="empresa">
+                    <span>Empresa</span>
+                </label>
+            </div>
+
+            <div class="forma__grade">
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Nome ou razão social</span>
+                    <input class="campo-forma__entrada" name="nome" type="text" required
+                           autocomplete="off" data-foco-inicial>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">CPF ou CNPJ</span>
+                    <input class="campo-forma__entrada" name="documento" type="text"
+                           inputmode="numeric" autocomplete="off" data-mascara="documento">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Telefone</span>
+                    <input class="campo-forma__entrada" name="telefone" type="tel" required
+                           inputmode="tel" autocomplete="off" data-mascara="telefone">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">WhatsApp</span>
+                    <input class="campo-forma__entrada" name="whatsapp" type="tel"
+                           inputmode="tel" autocomplete="off" data-mascara="telefone">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">E-mail</span>
+                    <input class="campo-forma__entrada" name="email" type="email" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+            </div>
+
+            <p class="forma__secao">Endereço</p>
+
+            <div class="forma__grade">
+                <label class="campo-forma campo-forma--curto">
+                    <span class="campo-forma__rotulo">CEP</span>
+                    <input class="campo-forma__entrada" name="cep" type="text"
+                           inputmode="numeric" autocomplete="off" data-mascara="cep">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--extenso">
+                    <span class="campo-forma__rotulo">Endereço</span>
+                    <input class="campo-forma__entrada" name="logradouro" type="text" required autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--curto">
+                    <span class="campo-forma__rotulo">Número</span>
+                    <input class="campo-forma__entrada" name="numero" type="text" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--extenso">
+                    <span class="campo-forma__rotulo">Complemento</span>
+                    <input class="campo-forma__entrada" name="complemento" type="text" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Bairro</span>
+                    <input class="campo-forma__entrada" name="bairro" type="text" required autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--curto">
+                    <span class="campo-forma__rotulo">Cidade</span>
+                    <input class="campo-forma__entrada" name="cidade" type="text" required
+                           value="São Paulo" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--curto">
+                    <span class="campo-forma__rotulo">Estado</span>
+                    <input class="campo-forma__entrada" name="estado" type="text" maxlength="2"
+                           value="SP" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Observações</span>
+                    <textarea class="campo-forma__entrada" name="observacoes" rows="3"
+                              placeholder="Acesso, preferências de horário, avisos para o técnico…"></textarea>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+            </div>
+        </div>
+
+        <footer class="folha__pe">
+            <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+            <button class="botao botao--primario" type="submit" data-pressionavel data-forma-enviar>
+                Salvar cliente
+            </button>
+        </footer>
+    </form>
+</dialog>
+
+<!-- Agendamento de visita --------------------------------------------------->
+<dialog class="folha" data-dialogo="visita" aria-labelledby="titulo-forma-visita">
+    <form class="folha__painel forma" data-forma="visita" novalidate>
+        <header class="folha__topo">
+            <div>
+                <p class="rotulo" data-forma-rotulo>Agenda</p>
+                <h2 class="folha__nome" id="titulo-forma-visita" data-forma-titulo>Nova visita</h2>
+            </div>
+            <button class="icone-botao" type="button" data-fechar aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fechar"/></svg>
+            </button>
+        </header>
+
+        <div class="folha__corpo">
+            <input type="hidden" name="id">
+
+            <div class="forma__grade">
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Cliente</span>
+                    <select class="campo-forma__entrada" name="clienteId" required
+                            data-lista-clientes data-foco-inicial></select>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Equipamento</span>
+                    <select class="campo-forma__entrada" name="equipamento" data-lista-equipamentos></select>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Data</span>
+                    <input class="campo-forma__entrada" name="data" type="date" required>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Horário</span>
+                    <input class="campo-forma__entrada" name="hora" type="time" required value="09:00">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Técnico</span>
+                    <select class="campo-forma__entrada" name="tecnicoId" required data-lista-tecnicos></select>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Tipo de atendimento</span>
+                    <select class="campo-forma__entrada" name="tipo" required>
+                        <option>Instalação</option>
+                        <option selected>Manutenção preventiva</option>
+                        <option>Manutenção corretiva</option>
+                        <option>Limpeza</option>
+                        <option>Vistoria</option>
+                        <option>Outro</option>
+                    </select>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Motivo</span>
+                    <input class="campo-forma__entrada" name="motivo" type="text" required
+                           placeholder="O que será feito nesta visita" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Observações</span>
+                    <textarea class="campo-forma__entrada" name="observacoes" rows="3"
+                              placeholder="Acesso ao local, peças a levar, contato prévio…"></textarea>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+            </div>
+        </div>
+
+        <footer class="folha__pe">
+            <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+            <button class="botao botao--primario" type="submit" data-pressionavel data-forma-enviar>
+                Agendar visita
+            </button>
+        </footer>
+    </form>
+</dialog>
+
+<!-- Cadastro de equipamento ------------------------------------------------->
+<dialog class="folha" data-dialogo="equipamento" aria-labelledby="titulo-forma-equipamento">
+    <form class="folha__painel forma" data-forma="equipamento" novalidate>
+        <header class="folha__topo">
+            <div>
+                <p class="rotulo" data-forma-rotulo>Cadastro</p>
+                <h2 class="folha__nome" id="titulo-forma-equipamento" data-forma-titulo>Novo equipamento</h2>
+            </div>
+            <button class="icone-botao" type="button" data-fechar aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fechar"/></svg>
+            </button>
+        </header>
+
+        <div class="folha__corpo">
+            <input type="hidden" name="codigo">
+
+            <p class="forma__nota" data-forma-codigo></p>
+
+            <div class="forma__grade">
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Cliente</span>
+                    <select class="campo-forma__entrada" name="clienteId" required
+                            data-lista-clientes data-foco-inicial></select>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Tipo</span>
+                    <select class="campo-forma__entrada" name="tipo" required>
+                        <option selected>Split Hi-Wall</option>
+                        <option>Split Cassete</option>
+                        <option>Piso-teto</option>
+                        <option>Multi Split</option>
+                        <option>Janela</option>
+                        <option>Portátil</option>
+                    </select>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Marca</span>
+                    <input class="campo-forma__entrada" name="marca" type="text" required autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Modelo</span>
+                    <input class="campo-forma__entrada" name="modelo" type="text" required autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Capacidade (BTUs)</span>
+                    <input class="campo-forma__entrada" name="capacidade" type="number" required
+                           min="5000" max="80000" step="1000" value="12000">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Número de série</span>
+                    <input class="campo-forma__entrada" name="numeroSerie" type="text" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Local da instalação</span>
+                    <input class="campo-forma__entrada" name="local" type="text" required
+                           placeholder="Sala, dormitório, recepção…" autocomplete="off">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Data da instalação</span>
+                    <input class="campo-forma__entrada" name="dataInstalacao" type="date" required>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Próxima manutenção</span>
+                    <input class="campo-forma__entrada" name="proximaManutencao" type="date">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Situação</span>
+                    <select class="campo-forma__entrada" name="status" required>
+                        <option value="funcionando" selected>Funcionando</option>
+                        <option value="atencao">Requer atenção</option>
+                        <option value="parado">Parado</option>
+                    </select>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Observações</span>
+                    <textarea class="campo-forma__entrada" name="observacoes" rows="3"
+                              placeholder="Posição da condensadora, particularidades da instalação…"></textarea>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+            </div>
+        </div>
+
+        <footer class="folha__pe">
+            <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+            <button class="botao botao--primario" type="submit" data-pressionavel data-forma-enviar>
+                Salvar equipamento
+            </button>
+        </footer>
+    </form>
+</dialog>
+
+<!-- Detalhe da visita ------------------------------------------------------->
+<dialog class="folha folha--curta" data-dialogo="visita-detalhe" aria-labelledby="titulo-detalhe-visita">
+    <div class="folha__painel">
+        <header class="folha__topo">
+            <div>
+                <p class="rotulo" data-detalhe-faixa></p>
+                <h2 class="folha__nome" id="titulo-detalhe-visita" data-detalhe-titulo></h2>
+            </div>
+            <button class="icone-botao" type="button" data-fechar aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fechar"/></svg>
+            </button>
+        </header>
+
+        <div class="folha__corpo" data-detalhe-corpo></div>
+
+        <footer class="folha__pe" data-detalhe-acoes></footer>
+    </div>
+</dialog>
+
+<script src="/js/shared/dom.js" defer></script>
+<script src="/js/shared/pressao.js" defer></script>
+<script src="/js/shared/revelar.js" defer></script>
+
+<script src="/js/sistema_js/data/clientes.mock.js" defer></script>
+<script src="/js/sistema_js/data/equipamentos.mock.js" defer></script>
+<script src="/js/sistema_js/data/visitas.mock.js" defer></script>
+<script src="/js/sistema_js/data/equipe.mock.js" defer></script>
+
+<script src="/js/sistema_js/formato.js" defer></script>
+<script src="/js/sistema_js/dados.js" defer></script>
+<script src="/js/sistema_js/interface.js" defer></script>
+<script src="/js/sistema_js/cartoes.js" defer></script>
+<script src="/js/sistema_js/formularios.js" defer></script>
+<script src="/js/sistema_js/navegacao.js" defer></script>
+<script src="{{script}}" defer></script>
+
+</body>
+</html>

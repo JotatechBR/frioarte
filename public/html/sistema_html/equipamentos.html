@@ -1,0 +1,37 @@
+    <div class="pagina">
+        <div class="pagina__texto">
+            <h1 class="pagina__titulo" data-titulo>Equipamentos</h1>
+            <p class="pagina__sub">
+                Cada máquina instalada, com dono, local
+                e quando foi a última manutenção.
+            </p>
+        </div>
+
+        <div class="pagina__acoes">
+            <button class="botao botao--primario" type="button" data-abrir="equipamento" data-pressionavel>
+                <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mais"/></svg>
+                Novo equipamento
+            </button>
+        </div>
+    </div>
+
+    <div class="controles">
+        <label class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+            <input type="search" data-procurar autocomplete="off"
+                   placeholder="Código FA, número de série, marca, local ou cliente"
+                   aria-label="Buscar equipamentos">
+        </label>
+
+        <nav class="filtros" data-filtros aria-label="Filtrar equipamentos">
+            <button class="filtro" type="button" data-filtro="todos" data-ativo="true">Todos</button>
+            <button class="filtro" type="button" data-filtro="funcionando">Funcionando</button>
+            <button class="filtro" type="button" data-filtro="atencao">Requer atenção</button>
+            <button class="filtro" type="button" data-filtro="parado">Parados</button>
+            <button class="filtro" type="button" data-filtro="manutencao">Manutenção vencida</button>
+        </nav>
+    </div>
+
+    <p class="contagem" data-contagem aria-live="polite"></p>
+
+    <div data-lista="equipamentos"></div>

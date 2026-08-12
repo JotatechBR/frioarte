@@ -1,0 +1,129 @@
+/*
+ * Equipamentos — lista e ficha.
+ *
+ * A ficha abre como uma página de produto: código pequeno, nome grande,
+ * capacidade logo abaixo. Depois três fatos em linha — situação, tempo de
+ * instalação e dono. Só então a ficha técnica, que é consulta.
+ */
+
+/* ---------- Cabeça da máquina ---------- */
+
+.maquina {
+    padding-bottom: var(--e-6);
+}
+
+.maquina__codigo {
+    margin: 0;
+    font-size: 0.8125rem;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    color: var(--tinta-fraca);
+}
+
+.maquina__nome {
+    margin: var(--e-3) 0 0;
+    font-family: var(--fonte-display);
+    font-size: var(--t-mega);
+    line-height: 0.98;
+    letter-spacing: var(--tr-mega);
+    font-weight: 700;
+    text-wrap: balance;
+    max-width: 16ch;
+}
+
+.maquina__capacidade {
+    margin: var(--e-3) 0 0;
+    font-family: var(--fonte-display);
+    font-size: var(--t-titulo);
+    line-height: 1.1;
+    letter-spacing: -0.028em;
+    font-weight: 500;
+    color: var(--tinta-fraca);
+}
+
+/* Três fatos lado a lado, separados por espaço e um fio no topo. */
+.maquina__fatos {
+    display: grid;
+    gap: var(--e-5) var(--e-6);
+    margin-top: var(--e-8);
+    padding-top: var(--e-5);
+    border-top: 1px solid var(--fio);
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.fato__rotulo {
+    margin: 0 0 var(--e-2);
+    font-size: 0.75rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    font-weight: 650;
+    color: var(--tinta-fraca);
+}
+
+.fato__valor {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.016em;
+}
+
+/* O tempo de instalação é número: merece corpo de número. */
+.fato__valor--tempo {
+    font-family: var(--fonte-display);
+    font-size: 1.5rem;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 650;
+}
+
+.fato__valor--texto a {
+    border-bottom: 1px solid var(--fio-forte);
+    transition: border-color 200ms ease;
+}
+
+.fato__valor--texto a:hover {
+    border-color: var(--tinta);
+}
+
+.fato__apoio {
+    margin: var(--e-2) 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    color: var(--tinta-media);
+}
+
+.fato__apoio[data-vencida='true'] {
+    color: var(--tom-ruim);
+}
+
+.maquina__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2);
+    margin-top: var(--e-7);
+}
+
+@media (max-width: 47.99rem) {
+    .maquina__nome {
+        max-width: none;
+    }
+
+    .maquina__fatos {
+        gap: var(--e-5);
+        grid-template-columns: 1fr;
+    }
+
+    .maquina__acoes {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .maquina__acoes .botao {
+        width: 100%;
+        min-height: 3rem;
+    }
+
+    .maquina__acoes .botao--primario {
+        grid-column: 1 / -1;
+    }
+}

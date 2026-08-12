@@ -3,6 +3,7 @@ const path = require('path');
 
 const seo = require('./shared/seo');
 const FRIOARTE = require('./shared/frioarte.dados');
+const { registrarPaginasSistema } = require('./paginas_sistema');
 
 const HTML = path.join(__dirname, '..', 'public', 'html', 'frioarte_html');
 
@@ -38,6 +39,12 @@ function registrarPaginas(app) {
     app.get('/sitemap.xml', (req, res) => {
         res.type('application/xml').send(montarSitemap());
     });
+
+    /*
+     * Sistema interno. Fica fora do sitemap e barrado no robots de propósito:
+     * é ferramenta de trabalho, não conteúdo de busca.
+     */
+    registrarPaginasSistema(app);
 }
 
 /**
@@ -79,6 +86,7 @@ function montarRobots() {
         '',
         // Material interno servido por engano não deveria virar resultado de busca.
         'Disallow: /api/',
+        'Disallow: /sistema',
         '',
         `Sitemap: ${base}/sitemap.xml`,
         ''
