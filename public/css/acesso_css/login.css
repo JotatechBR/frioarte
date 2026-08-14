@@ -1,0 +1,747 @@
+/*
+ * Página de acesso ao sistema interno.
+ *
+ * Composição de duas metades. À esquerda o formulário, no ponto onde a leitura
+ * começa — é ele o assunto da página. À direita uma cena escura que não pede
+ * nada: ar em movimento muito lento, luz fria e uma escala em fio, do jeito que
+ * um instrumento de medição é desenhado. Nenhum floco, nenhum aparelho, nenhum
+ * fundo azul.
+ *
+ * No celular a cena sai inteira em vez de ser espremida: a mesma atmosfera
+ * entra como luz no alto da tela clara, e a composição é outra — não o desktop
+ * reduzido.
+ *
+ * Tudo que é forma (tipografia, cor, campo, botão, revelação) vem de
+ * variaveis.css e base.css. Aqui mora só o que é desta tela.
+ */
+
+.acesso {
+    /* Medida do formulário: linha curta, que se lê sem varrer a tela. */
+    --acesso-medida: 27rem;
+
+    /* Os campos precisam continuar desenhados mesmo vazios. Estes três tons
+       locais deixam repouso, aproximação e preenchimento legíveis como
+       estados diferentes sem engrossar o fio. */
+    --acesso-fio-repouso: rgba(16, 20, 24, 0.17);
+    --acesso-fio-hover: rgba(16, 20, 24, 0.28);
+    --acesso-fio-preenchido: rgba(10, 42, 92, 0.42);
+
+    /* Vermelho um pouco mais fechado que o de base.css: este cai sobre branco
+       em texto pequeno, e precisa de contraste para valer como aviso. */
+    --acesso-alerta: #c0392f;
+
+    display: grid;
+    min-height: 100svh;
+    min-height: 100dvh;
+    /* As massas de luz ultrapassam o painel de propósito, mas não podem criar
+       uma faixa rolável fora da viewport. `clip` contém sem abrir um novo
+       contexto de rolagem, importante quando o teclado virtual aparece. */
+    overflow-x: clip;
+    background: var(--branco);
+}
+
+/* ---------- Metade do formulário ---------- */
+
+.acesso__painel {
+    position: relative;
+    display: grid;
+    isolation: isolate;
+    padding-block: calc(var(--e-6) + env(safe-area-inset-top))
+        calc(var(--e-5) + env(safe-area-inset-bottom));
+    padding-inline: max(var(--goteira), env(safe-area-inset-left))
+        max(var(--goteira), env(safe-area-inset-right));
+}
+
+/*
+ * A luz fria do alto. Não é decoração colada: é o mesmo campo de gelo e azul
+ * que o site usa no hero, em dose muito menor. No celular é ela que impede a
+ * tela de virar um papel branco.
+ */
+.acesso__painel::before {
+    content: '';
+    position: absolute;
+    inset: -22% -30% auto -30%;
+    height: 62%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(48% 52% at 74% 38%, rgba(86, 211, 227, 0.2), transparent 70%),
+        radial-gradient(44% 48% at 30% 18%, rgba(26, 104, 199, 0.11), transparent 72%);
+}
+
+/*
+ * Três faixas: marca, formulário e pé. O formulário fica no meio por `1fr`, e
+ * não por altura fixa — quando o teclado do celular abre, é esta faixa que
+ * cede, e as outras duas continuam onde estavam.
+ */
+.acesso__interno {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: var(--e-6);
+    width: 100%;
+    max-width: var(--acesso-medida);
+    margin-inline: auto;
+}
+
+.acesso__topo {
+    display: flex;
+    align-items: center;
+}
+
+.acesso__logo {
+    height: 1.75rem;
+    transition: opacity 200ms ease;
+}
+
+.acesso .marca:hover .acesso__logo {
+    opacity: 0.72;
+}
+
+.acesso__meio {
+    display: flex;
+    flex-direction: column;
+    /* Sem isto a faixa não encolhe abaixo do conteúdo e o teclado empurra o pé
+       para fora da tela. */
+    min-height: 0;
+}
+
+/*
+ * `margin: auto` no lugar de `justify-content: center`: centraliza igual e, se
+ * a altura acabar (celular deitado, teclado aberto), a sobra vai para a rolagem
+ * em vez de cortar o topo do bloco.
+ */
+.acesso__bloco {
+    margin-block: auto;
+}
+
+/* Em telas altas, o centro geométrico parece baixo porque o formulário tem
+   mais peso visual embaixo. Uma correção curta devolve o centro óptico. */
+@media (min-height: 48rem) {
+    .acesso__bloco {
+        transform: translateY(-0.875rem);
+    }
+}
+
+.acesso__cabeca {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
+    margin-bottom: var(--e-7);
+}
+
+.acesso__titulo {
+    font-family: var(--fonte-display);
+    font-optical-sizing: auto;
+    font-size: clamp(1.875rem, 1.35rem + 1.65vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.034em;
+    font-weight: 700;
+    margin: 0;
+    text-wrap: balance;
+}
+
+.acesso__forma {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-5);
+}
+
+/* ---------- Campos ----------
+   Herdam o campo do site (rótulo em cima, fio embaixo, sem caixa) e ganham o
+   que uma tela de acesso precisa: altura de toque, estado de foco inconfundível
+   e um lugar fixo para a mensagem de erro. */
+
+.acesso__campo {
+    gap: var(--e-2);
+}
+
+/* Rótulo à esquerda, "esqueci minha senha" à direita, na mesma linha: o
+   formulário mantém uma coluna só, sem um link solto no meio. */
+.acesso__rotulo-linha {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--e-4);
+}
+
+.acesso__caixa {
+    position: relative;
+    display: block;
+}
+
+/* O campo acende ao receber foco. A luz sangra alguns pixels para os lados —
+   o texto continua alinhado ao rótulo, e não indentado dentro de uma caixa. */
+.acesso__caixa::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(var(--e-3) * -1) 1px;
+    border-radius: var(--r-2) var(--r-2) 0 0;
+    background: var(--acento-tenue);
+    opacity: 0;
+    transition: opacity 240ms ease;
+    pointer-events: none;
+}
+
+/* O fio de foco cresce a partir da origem, como o sublinhado dos links do
+   site. É a mesma gramática de movimento. */
+.acesso__caixa::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--acento);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 380ms var(--curva-saida), background-color 200ms ease;
+}
+
+.acesso__caixa:focus-within::before {
+    opacity: 1;
+}
+
+.acesso__caixa:focus-within::after {
+    transform: scaleX(1);
+}
+
+.acesso__entrada {
+    /* Acima da luz de foco, que é absoluta dentro da mesma caixa. */
+    position: relative;
+    z-index: 1;
+    min-height: 3.25rem;
+    padding: 0.9375rem 0;
+    /* 17px: abaixo de 16 o iOS dá zoom sozinho ao focar o campo. */
+    font-size: 1.0625rem;
+    letter-spacing: -0.004em;
+    border-bottom-color: var(--acesso-fio-repouso);
+    transition: border-color 240ms ease, color 240ms ease;
+}
+
+/*
+ * `:user-invalid` do base.css marcaria o campo de vermelho só por passar por
+ * ele vazio. Quem decide quando existe erro aqui é o envio, via aria-invalid.
+ */
+.acesso__entrada:user-invalid {
+    border-bottom-color: var(--acesso-fio-repouso);
+    box-shadow: none;
+}
+
+.acesso__entrada:hover {
+    border-bottom-color: var(--acesso-fio-hover);
+}
+
+/* Preenchido: o fio firma. O campo vazio é o mais leve dos três estados. */
+.acesso__entrada:not(:placeholder-shown) {
+    border-bottom-color: var(--acesso-fio-preenchido);
+}
+
+/* O foco é o fio de acento e a luz do campo — o contorno padrão seria uma
+   segunda marcação em cima da mesma coisa. */
+.acesso__entrada:focus,
+.acesso__entrada:focus-visible {
+    outline: none;
+    box-shadow: none;
+    border-bottom-color: var(--acesso-fio-hover);
+}
+
+.acesso__entrada:disabled {
+    color: var(--tinta-fraca);
+    border-bottom-style: dashed;
+    cursor: not-allowed;
+}
+
+.acesso__campo:has(:disabled) .campo__rotulo {
+    opacity: 0.6;
+}
+
+/* O amarelo do preenchimento automático apagaria o campo desenhado. */
+.acesso__entrada:-webkit-autofill,
+.acesso__entrada:-webkit-autofill:hover,
+.acesso__entrada:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--tinta);
+    -webkit-box-shadow: 0 0 0 60px var(--branco) inset;
+    caret-color: var(--tinta);
+}
+
+.acesso__entrada--senha {
+    /* Espaço do botão de mostrar senha. */
+    padding-right: 3rem;
+    /* Os pontos da senha ficam largos demais na fonte de texto. */
+    font-family: var(--fonte);
+}
+
+/* Erro: fio vermelho, mensagem escrita e aria-invalid. Nunca só a cor. */
+.acesso__entrada[aria-invalid='true'] {
+    border-bottom-color: var(--acesso-alerta);
+}
+
+.acesso__caixa:has([aria-invalid='true'])::after {
+    background: var(--acesso-alerta);
+    transform: scaleX(1);
+}
+
+.acesso__erro {
+    margin: 0;
+    color: var(--acesso-alerta);
+    line-height: 1.45;
+}
+
+/* ---------- Mostrar senha ---------- */
+
+.acesso__olho {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: -0.5rem;
+    display: grid;
+    place-items: center;
+    /* 44px de alvo, ainda que o ícone tenha 20. */
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--r-pilula);
+    color: var(--tinta-fraca);
+    transform: translateY(-50%);
+    transition: color 200ms ease, background-color 200ms ease;
+}
+
+.acesso__olho:hover {
+    color: var(--tinta);
+    background: var(--acento-tenue);
+}
+
+.acesso__olho:active {
+    transform: translateY(-50%) scale(0.92);
+}
+
+.acesso__olho svg {
+    grid-area: 1 / 1;
+    width: 1.25rem;
+    height: 1.25rem;
+    transition: opacity 220ms ease, transform 260ms var(--curva-saida);
+}
+
+/*
+ * A troca dos dois ícones é só CSS, a partir do `aria-pressed` do botão: o
+ * script cuida do estado, não da aparência.
+ */
+.acesso__olho [data-olho='fechado'],
+.acesso__olho[aria-pressed='true'] [data-olho='aberto'] {
+    opacity: 0;
+    transform: scale(0.86);
+}
+
+.acesso__olho[aria-pressed='true'] [data-olho='fechado'] {
+    opacity: 1;
+    transform: none;
+}
+
+/* ---------- Link discreto ---------- */
+
+.acesso__elo {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--tinta-fraca);
+    transition: color 200ms ease;
+}
+
+.acesso__elo:hover {
+    color: var(--acento);
+}
+
+/* ---------- Botão ---------- */
+
+.acesso__enviar {
+    width: 100%;
+    min-height: 3.5rem;
+    margin-top: var(--e-2);
+    /* Luz na aresta de cima: o azul chapado é o que faz botão de painel. */
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 58%);
+    box-shadow: 0 1px 2px rgba(10, 42, 92, 0.12), 0 6px 16px rgba(10, 42, 92, 0.13);
+}
+
+.acesso__enviar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 1px 2px rgba(10, 42, 92, 0.14), 0 8px 20px rgba(10, 42, 92, 0.16);
+}
+
+/* Depois do hover, senão o afundar do toque não acontece. */
+.acesso__enviar[data-pressionado='true'] {
+    transform: scale(0.98);
+    box-shadow: var(--sombra-marca);
+}
+
+/* ---------- Recado da tela ---------- */
+
+.acesso__recado {
+    margin: 0;
+    padding: var(--e-3) var(--e-4);
+    border-radius: var(--r-2);
+    background: var(--nevoa);
+    /* Fio de acento por sombra interna: uma borda a menos no desenho. */
+    box-shadow: inset 2px 0 0 var(--acento);
+    font-size: var(--t-pequeno);
+    line-height: 1.5;
+    color: var(--tinta-media);
+    animation: acesso-surgir 320ms var(--curva-saida) both;
+}
+
+/* Enquanto não há o que dizer, não existe caixa nenhuma na tela. */
+.acesso__recado:empty {
+    display: none;
+}
+
+/* ---------- Pé ---------- */
+
+.acesso__pe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-2) var(--e-5);
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--fio);
+    font-size: 0.8125rem;
+    color: var(--tinta-fraca);
+}
+
+.acesso__voltar {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--tinta-media);
+    transition: color 200ms ease;
+}
+
+.acesso__voltar:hover {
+    color: var(--tinta);
+}
+
+.acesso__voltar svg {
+    width: 0.875rem;
+    height: 0.875rem;
+    transition: transform 260ms var(--curva-saida);
+}
+
+.acesso__voltar:hover svg {
+    transform: translateX(-3px);
+}
+
+.acesso__restrito {
+    margin: 0;
+}
+
+/* ---------- Cena ----------
+   Fora do celular. Aqui o desktop deixa de ser "o mobile esticado": ganha uma
+   metade inteira que só existe para dar profundidade e silêncio ao redor do
+   formulário. */
+
+.acesso__cena {
+    display: none;
+}
+
+/* Tablet largo já comporta a composição completa e usa o mesmo ponto de
+   virada do restante do site. */
+@media (min-width: 60rem) {
+    .acesso {
+        /* Assimetria: a cena é a metade maior, o formulário é o assunto. */
+        grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
+    }
+
+    .acesso__painel {
+        padding-block: var(--e-7);
+    }
+
+    /* Sobre a metade escura, a luz do alto ficaria estranha vindo do vizinho. */
+    .acesso__painel::before {
+        inset: -26% -12% auto -30%;
+        height: 54%;
+        opacity: 0.85;
+    }
+
+    .acesso__cena {
+        position: relative;
+        display: grid;
+        align-content: end;
+        gap: var(--e-9);
+        overflow: hidden;
+        isolation: isolate;
+        padding: var(--e-9) clamp(2.5rem, 3.6vw, 4.5rem) var(--e-8);
+    }
+
+    /* O campo escuro da marca — o mesmo da chamada final da home. */
+    .acesso__cena::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        background: var(--final-campo);
+    }
+
+    /*
+     * Profundidade: a cena escurece encostando no formulário, e a metade clara
+     * passa a ler como a camada de cima. Um degradê, nenhuma sombra.
+     */
+    .acesso__cena::after {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 10rem;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(to right, rgba(6, 9, 12, 0.5), transparent);
+    }
+
+    /* Duas massas de ar frio, muito grandes e muito lentas. */
+    .acesso__ar {
+        position: absolute;
+        inset: -25%;
+        z-index: -1;
+        pointer-events: none;
+        background:
+            radial-gradient(34% 30% at 34% 30%, rgba(86, 211, 227, 0.2), transparent 68%),
+            radial-gradient(30% 28% at 66% 60%, rgba(26, 104, 199, 0.26), transparent 70%);
+        animation: acesso-corrente 42s ease-in-out infinite alternate;
+        will-change: transform;
+    }
+
+    .acesso__frase {
+        font-family: var(--fonte-display);
+        font-optical-sizing: auto;
+        font-size: clamp(2.125rem, 1.1rem + 1.9vw, 3.25rem);
+        line-height: 1.04;
+        letter-spacing: -0.036em;
+        font-weight: 700;
+        max-width: 12ch;
+        margin: 0 0 var(--e-5);
+        color: var(--tinta);
+    }
+
+    .acesso__apoio {
+        max-width: 36ch;
+        margin: 0;
+        font-size: var(--t-corpo);
+        line-height: 1.6;
+        color: var(--tinta-media);
+    }
+
+    .acesso__cena-pe {
+        display: flex;
+        flex-direction: column;
+        gap: var(--e-4);
+    }
+
+    /*
+     * Escala de instrumento: traços curtos a cada 12px, traços longos a cada
+     * 48, apagando para a direita. É a ideia de medida e precisão sem desenhar
+     * nenhum aparelho.
+     */
+    .acesso__escala {
+        --traco: rgba(244, 246, 248, 0.24);
+        --traco-forte: rgba(244, 246, 248, 0.42);
+        height: 1rem;
+        width: min(100%, 42rem);
+        background-image:
+            repeating-linear-gradient(90deg, var(--traco) 0 1px, transparent 1px 0.75rem),
+            repeating-linear-gradient(90deg, var(--traco-forte) 0 1px, transparent 1px 3rem);
+        background-size: 100% 0.375rem, 100% 0.875rem;
+        background-position: 0 100%;
+        background-repeat: no-repeat;
+        -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 32%, transparent 90%);
+        mask-image: linear-gradient(90deg, #000 0%, #000 32%, transparent 90%);
+    }
+
+    .acesso__modulos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--e-3);
+        margin: 0;
+        font-size: var(--t-micro);
+        letter-spacing: var(--tr-micro);
+        text-transform: uppercase;
+        font-weight: 650;
+        color: var(--tinta-fraca);
+    }
+}
+
+/* Antes de a cena entrar, o tablet conserva a origem de leitura à esquerda
+   em vez de deixar uma coluna pequena boiando no centro da tela. */
+@media (min-width: 48rem) and (max-width: 59.999rem) {
+    .acesso__interno {
+        margin-inline: 0 auto;
+    }
+}
+
+/* Telas largas: o formulário não acompanha a largura da janela, mas o ar ao
+   redor dele sim. */
+@media (min-width: 100rem) {
+    .acesso {
+        --acesso-medida: 28.5rem;
+    }
+}
+
+/* Celular deitado e telas baixas: o pouco que existe de altura vira respiro
+   menor, não rolagem. */
+@media (max-height: 34rem) and (orientation: landscape) {
+    .acesso__painel {
+        padding-block: var(--e-4) var(--e-4);
+    }
+
+    .acesso__interno {
+        gap: var(--e-4);
+    }
+
+    .acesso__cabeca {
+        margin-bottom: var(--e-5);
+    }
+
+    .acesso__forma {
+        gap: var(--e-4);
+    }
+}
+
+/* ---------- Entrada em cena ----------
+   Um gesto só, escalonado: a página assenta em pouco mais de meio segundo e
+   para. Nada continua se mexendo depois — menos o ar da cena, que é ambiente. */
+
+@keyframes acesso-surgir {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 12px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* A linha do título emerge por baixo da máscara, como no site. */
+@keyframes acesso-emergir {
+    from {
+        transform: translate3d(0, 0.42em, 0);
+    }
+
+    to {
+        transform: none;
+    }
+}
+
+@keyframes acesso-aparecer {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes acesso-corrente {
+    from {
+        transform: translate3d(-2%, -1.5%, 0) scale(1);
+    }
+
+    to {
+        transform: translate3d(2.5%, 2%, 0) scale(1.08);
+    }
+}
+
+[data-entrada] {
+    animation: acesso-surgir 680ms var(--curva-cena) both;
+    animation-delay: var(--atraso, 0ms);
+}
+
+.acesso__topo {
+    --atraso: 40ms;
+}
+
+.acesso__cabeca .rotulo {
+    --atraso: 140ms;
+}
+
+.acesso__titulo {
+    --atraso: 200ms;
+}
+
+.acesso__forma > *:nth-child(1) {
+    --atraso: 280ms;
+}
+
+.acesso__forma > *:nth-child(2) {
+    --atraso: 340ms;
+}
+
+.acesso__forma > *:nth-child(3) {
+    --atraso: 400ms;
+}
+
+.acesso__pe {
+    --atraso: 480ms;
+}
+
+.acesso__frase .linha > span {
+    display: block;
+    animation: acesso-emergir 900ms var(--curva-cena) both;
+    animation-delay: var(--atraso, 0ms);
+}
+
+.acesso__frase .linha:nth-child(1) > span {
+    --atraso: 80ms;
+}
+
+.acesso__frase .linha:nth-child(2) > span {
+    --atraso: 170ms;
+}
+
+.acesso__apoio {
+    --atraso: 320ms;
+}
+
+.acesso__cena-pe {
+    --atraso: 440ms;
+}
+
+/*
+ * Movimento reduzido: a mesma sequência chega só por opacidade, sem
+ * deslocamento, sem máscara e sem o ar em movimento.
+ */
+@media (prefers-contrast: more) {
+    .acesso {
+        --acesso-fio-repouso: rgba(16, 20, 24, 0.48);
+        --acesso-fio-hover: rgba(16, 20, 24, 0.66);
+        --acesso-fio-preenchido: #0a2a5c;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-entrada],
+    .acesso__frase .linha > span,
+    .acesso__recado {
+        animation: acesso-aparecer 260ms ease both;
+    }
+
+    .acesso__ar {
+        animation: none;
+    }
+
+    .acesso__caixa::after {
+        transition: none;
+    }
+
+    .acesso__enviar:hover,
+    .acesso__enviar[data-pressionado='true'] {
+        transform: none;
+    }
+
+    .acesso__enviar[data-pressionado='true'] {
+        opacity: 0.7;
+    }
+
+    .acesso__voltar:hover svg,
+    .acesso__olho:active {
+        transform: translateY(0);
+    }
+
+    .acesso__olho:active {
+        transform: translateY(-50%);
+    }
+}

@@ -20,6 +20,7 @@
     const D = window.FrioArteDados;
     const F = window.FrioArteFormato;
     const UI = window.FrioArteInterface;
+    const LOG = window.FrioArteDiario;
     const { escapar } = window.FrioArteDom;
 
     const dialogos = {};
@@ -33,13 +34,36 @@
     }
 
     function avisarMudanca(tipo, registro) {
+        LOG.info('cadastro', `salvou-${tipo}`, {
+            id: registro.id || registro.codigo,
+            cliente: registro.clienteId
+        });
+
         document.dispatchEvent(new CustomEvent('sistema:atualizado', { detail: { tipo, registro } }));
+    }
+
+    /** O que o usuário pediu para abrir — a intenção, antes do resultado. */
+    function anotarAbertura(qual, alvo) {
+        LOG.info('cadastro', `abriu-${qual}`, {
+            modo: alvo ? 'edicao' : 'novo',
+            alvo: alvo || undefined
+        });
     }
 
     /* ---------- Preenchimento das listas ---------- */
 
+    /*
+     * Listas vazias dizem o que falta, em vez de abrirem um campo em branco. O
+     * sistema começa sem nenhum cadastro: é um estado comum, não um defeito, e
+     * a tela precisa explicá-lo.
+     */
     async function preencherClientes(select, selecionado) {
         const clientes = await D.carregarClientes({ filtro: 'todos' });
+
+        if (clientes.length === 0) {
+            select.innerHTML = '<option value="">Nenhum cliente cadastrado</option>';
+            return;
+        }
 
         select.innerHTML = '<option value="">Selecione o cliente</option>'
             + clientes
@@ -52,9 +76,15 @@
     async function preencherTecnicos(select, selecionado) {
         const tecnicos = await D.carregarTecnicos();
 
-        select.innerHTML = tecnicos
-            .map((tecnico) => `<option value="${tecnico.id}">${escapar(tecnico.nome)}</option>`)
-            .join('');
+        if (tecnicos.length === 0) {
+            select.innerHTML = '<option value="">Nenhum técnico cadastrado</option>';
+            return;
+        }
+
+        select.innerHTML = '<option value="">A definir</option>'
+            + tecnicos
+                .map((tecnico) => `<option value="${tecnico.id}">${escapar(tecnico.nome)}</option>`)
+                .join('');
 
         if (selecionado) select.value = String(selecionado);
     }
@@ -88,6 +118,8 @@
     /* ---------- Cliente ---------- */
 
     async function abrirCliente(id) {
+        anotarAbertura('cliente', id);
+
         const alvo = dialogo('cliente');
         const forma = alvo.querySelector('[data-forma="cliente"]');
 
@@ -159,6 +191,9 @@
 
     async function abrirVisita(opcoes) {
         const dados = opcoes || {};
+
+        anotarAbertura('visita', dados.id);
+
         const alvo = dialogo('visita');
         const forma = alvo.querySelector('[data-forma="visita"]');
 
@@ -225,6 +260,9 @@
 
     async function abrirEquipamento(opcoes) {
         const dados = opcoes || {};
+
+        anotarAbertura('equipamento', dados.codigo);
+
         const alvo = dialogo('equipamento');
         const forma = alvo.querySelector('[data-forma="equipamento"]');
 
@@ -301,7 +339,13 @@
 
     async function abrirDetalheVisita(id) {
         const visita = await D.carregarVisita(id);
-        if (!visita) return;
+
+        if (!visita) {
+            LOG.aviso('visita', 'detalhe-inexistente', { alvo: id });
+            return;
+        }
+
+        LOG.info('visita', 'abriu-detalhe', { alvo: id, status: visita.status });
 
         const alvo = dialogo('visita-detalhe');
         const cliente = visita.cliente || {};
@@ -395,7 +439,16 @@
         forma.addEventListener('submit', async (evento) => {
             evento.preventDefault();
 
-            if (!UI.validar(forma)) return;
+            if (!UI.validar(forma)) {
+                // Formulário barrado na validação é sinal de campo mal
+                // resolvido: se aparecer sempre no mesmo, o problema é a tela.
+                LOG.aviso('cadastro', `invalido-${nome}`, {
+                    campo: forma.querySelector('[data-invalido="true"]')
+                        ? forma.querySelector('[data-invalido="true"]').name
+                        : undefined
+                });
+                return;
+            }
 
             const botao = forma.querySelector('[data-forma-enviar]');
             const rotulo = botao.textContent;
@@ -407,7 +460,7 @@
                 await salvar(forma);
                 UI.fecharDialogo(forma.closest('dialog'));
             } catch (erro) {
-                console.error(`[sistema] falha ao salvar ${nome}:`, erro);
+                LOG.erro('cadastro', `falhou-${nome}`, { mensagem: erro && erro.message });
                 UI.notificar({ titulo: 'Não foi possível salvar.', tom: 'ruim' });
             } finally {
                 botao.disabled = false;
@@ -488,6 +541,8 @@
 
             if (concluir) {
                 concluir.disabled = true;
+
+                LOG.info('visita', 'concluiu', { alvo: concluir.dataset.concluir });
 
                 D.atualizarStatusVisita(concluir.dataset.concluir, 'concluida').then((visita) => {
                     UI.fecharDialogo(dialogo('visita-detalhe'));

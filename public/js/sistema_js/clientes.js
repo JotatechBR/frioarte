@@ -31,7 +31,10 @@
                 titulo: consulta.termo ? 'Nenhum cliente encontrado' : 'Nenhum cliente ainda',
                 texto: consulta.termo
                     ? `Nada corresponde a “${consulta.termo}”. Tente parte do nome, do telefone ou do endereço.`
-                    : 'Cadastre o primeiro cliente para começar a registrar equipamentos e visitas.'
+                    : 'Cadastre o primeiro cliente para começar a registrar equipamentos e visitas.',
+                // Na busca sem resultado o caminho é corrigir o termo, não abrir
+                // um cadastro que a pessoa não pediu.
+                acao: consulta.termo ? null : { abrir: 'cliente', rotulo: 'Cadastrar cliente' }
             }));
     }
 

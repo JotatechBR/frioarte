@@ -9,6 +9,7 @@
     const D = window.FrioArteDados;
     const F = window.FrioArteFormato;
     const UI = window.FrioArteInterface;
+    const LOG = window.FrioArteDiario;
     const { escapar } = window.FrioArteDom;
 
     const raiz = document.documentElement;
@@ -29,6 +30,19 @@
 
     async function mostrarUsuario() {
         const usuario = await D.carregarUsuario();
+        const bloco = document.querySelector('.lateral__pe');
+
+        /*
+         * Sem usuário — hoje, sempre; depois, só antes de autenticar — o rodapé
+         * da lateral sai inteiro. Um avatar vazio com duas linhas em branco é
+         * pior do que espaço nenhum.
+         */
+        if (!usuario) {
+            if (bloco) bloco.hidden = true;
+            return;
+        }
+
+        if (bloco) bloco.hidden = false;
 
         document.querySelectorAll('[data-usuario-nome]').forEach((no) => {
             no.textContent = usuario.nome;
@@ -113,6 +127,13 @@
             }
 
             const achados = await D.buscar(termo);
+
+            // Busca sem resultado é informação: mostra o que as pessoas
+            // procuram e o sistema não sabe responder.
+            LOG.registrar(achados.total ? 'info' : 'aviso', 'busca', 'global', {
+                termo,
+                achados: achados.total
+            });
 
             painel.innerHTML = achados.total
                 ? montarResultados(achados)
@@ -262,7 +283,10 @@
             painel.dataset.aberto = estado ? 'true' : 'false';
             botao.setAttribute('aria-expanded', estado ? 'true' : 'false');
 
-            if (estado) atualizar();
+            if (estado) {
+                LOG.info('avisos', 'abriu');
+                atualizar();
+            }
         }
 
         botao.addEventListener('click', (evento) => {
@@ -326,11 +350,14 @@
     function tentar(nome, acao) {
         try {
             const resultado = acao();
+
             if (resultado && resultado.catch) {
-                resultado.catch((erro) => console.error(`[sistema] "${nome}" falhou:`, erro));
+                resultado.catch((erro) => {
+                    LOG.erro('chrome', 'falhou', { peca: nome, mensagem: erro && erro.message });
+                });
             }
         } catch (erro) {
-            console.error(`[sistema] "${nome}" falhou e foi isolado:`, erro);
+            LOG.erro('chrome', 'falhou', { peca: nome, mensagem: erro && erro.message });
         }
     }
 

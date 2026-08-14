@@ -13,6 +13,11 @@ npm start
 
 Depois abra `http://localhost:3000`.
 
+O servidor escuta em `0.0.0.0`, então também responde pelo IP da máquina na rede
+local — é assim que o técnico abre `/sistema` no celular. Ao subir, ele imprime
+os endereços de rede disponíveis. Para restringir só a esta máquina, use
+`HOST=127.0.0.1` no `.env`.
+
 Em desenvolvimento a home é remontada a cada pedido, então basta salvar o HTML e
 dar F5. Em produção (`NODE_ENV=production`) ela é montada uma vez e fica em
 memória.
@@ -61,17 +66,22 @@ frio arte/
         └── frioarte-og.jpg         1200×630, prévia do link (gerada pelo script)
 ```
 
+
 ## Sistema interno (`/sistema`)
 
 Ferramenta de trabalho da equipe: clientes, equipamentos instalados e visitas
 técnicas. Vive no mesmo monólito, com a mesma linguagem visual do site em escala
 de aplicação.
 
-**Nesta etapa não existe banco de dados.** Tudo vem de dados simulados em
-`public/js/sistema_js/data/`, e toda a interface conversa com `dados.js`, que é
-a única peça do frontend que sabe de onde os dados vêm. Quando a API existir,
-troca-se o miolo dessas funções por `fetch('/api/clientes')` e nenhuma tela
-muda.
+O backend já possui persistência MySQL e APIs REST para usuários, clientes,
+equipamentos e visitas. A base começa vazia — não há nenhum cadastro fictício.
+Toda a interface conversa com `dados.js`, a única peça do frontend que sabe de
+onde os dados vêm; por enquanto ele ainda lê os arrays de
+`public/js/sistema_js/data/`. A próxima etapa troca o miolo dessas funções por
+`fetch('/api/clientes')` e pelas demais rotas, sem mudar as telas.
+
+Os arquivos em `data/` estão vazios de propósito e documentam, em comentário, o
+formato de cada registro — é o contrato que a API vai precisar devolver.
 
 ```text
 public/html/sistema_html/
@@ -103,14 +113,65 @@ public/js/sistema_js/
 
 Detalhes que valem saber:
 
-- **Datas das visitas são relativas a hoje** (`visitas.mock.js`). Datas fixas
-  fariam a agenda envelhecer e o painel esvaziar em uma semana.
 - **Nada é escrito à mão que possa ser calculado**: tempo de instalação,
   atraso, "em 30 minutos", próxima visita e os avisos do sino saem todos das
-  datas.
+  datas. Nenhum desses rótulos é campo do registro.
 - **O que se cadastra durante a sessão** fica em `sessionStorage`, só as
-  alterações — sobrevive à navegação entre telas e some ao fechar a aba.
+  alterações — sobrevive à navegação entre telas e some ao fechar a aba. É o
+  substituto temporário do banco, não um recurso do produto.
+- **Base vazia é estado normal, não erro.** Toda tela tem um estado vazio que
+  explica a ausência e oferece a próxima ação; o painel troca a ação principal
+  para "Cadastrar cliente" enquanto não houver nenhum.
+- **Sem usuário logado**, o rodapé da lateral some e o painel cumprimenta sem
+  nome. O perfil volta quando existir autenticação.
+- **Técnico não é obrigatório** ao agendar: marca-se a visita e define-se quem
+  vai depois. Enquanto `equipe.mock.js` estiver vazio, toda visita fica "a
+  definir".
 - O sistema está fora do `sitemap.xml` e barrado no `robots.txt`.
+
+## Registro ao vivo
+
+Tudo que acontece no sistema interno sai no terminal onde o servidor está
+rodando, em tempo real. **Nada é gravado** — nem em disco, nem no navegador.
+Fechou o terminal, acabou o registro.
+
+```text
+18:18:50  info        http/pedido               8ms  metodo=GET rota=/sistema status=200 de=local
+18:18:51  info      ~ tela/abriu                     aparelho=celular largura=390 sessao=a1b2c3
+18:18:51  depuracao ~ dados/carregarClientes  124ms  filtro=todos itens=0 tela=clientes
+18:18:51  info      ~ cadastro/salvou-cliente        id=1 tela=clientes
+18:18:51  aviso     ~ busca/global              8ms  termo=carlos achados=0
+18:18:51  erro      ~ tela/excecao                   mensagem=... arquivo=clientes.js linha=42
+```
+
+O til (`~`) marca o que veio do navegador. É o ponto principal do desenho: a
+interface manda os acontecimentos dela para o servidor, então **o que o técnico
+faz no celular aparece nesta janela** — no console do aparelho ninguém está
+olhando.
+
+| Peça                                  | O que faz                                        |
+| ------------------------------------- | ------------------------------------------------ |
+| `api/shared/diario.js`                | Formata e imprime. Nunca lança exceção            |
+| `api/middleware/registroPedidos.js`   | Cada pedido HTTP: rota, status, tempo, de onde     |
+| `api/rota_sistema/rota_sistema.js`    | `POST /api/sistema/registros` — recebe do navegador |
+| `public/js/sistema_js/diario.js`      | Registra na tela e envia em lote a cada 1,2s      |
+
+Detalhes que valem saber:
+
+- **A camada de dados sai envolvida pelo diário** (`dados.js`), então toda
+  consulta e toda gravação viram uma linha com duração e tamanho do resultado,
+  sem uma chamada de log dentro de cada função. Quando virar `fetch`, o mesmo
+  registro passa a medir a rede.
+- **Arquivo estático não é registrado**, a não ser que falhe — uma tela puxa
+  dezenas de CSS e JS, e imprimir todos afogaria o que interessa.
+- **Dado pessoal não entra.** O que vai para a linha é identificador,
+  contagem, filtro e duração; nunca o registro inteiro do cliente com telefone,
+  CPF e endereço. É um log para acompanhar o sistema, e ele fica numa janela
+  aberta o dia inteiro.
+- **`LOG_NIVEL`** no `.env` controla o volume: `depuracao` mostra cada consulta,
+  `info` mostra ação e navegação, `aviso` e `erro` mostram só problema.
+- Se `diario.js` não carregar, o `<head>` deixou um diário mudo no lugar e nada
+  quebra.
 
 ## Fluxo da página
 
@@ -228,8 +289,9 @@ com repository e uma tabela — a estrutura do projeto já comporta.
 
 ## Pendências
 
-- **Segunda etapa do sistema interno.** Banco, API, autenticação e persistência
-  real. A interface já está preparada: as telas só falam com `dados.js`.
+- **Integração do frontend e autenticação.** O banco e o CRUD da API já estão
+  prontos; `dados.js` ainda usa a simulação de sessão e a tela de login ainda
+  não cria uma sessão autenticada.
 
 - **Fotografia.** Todas as imagens do site são geradas por IA, usadas como
   referência de ambiente com o aval da empresa. Os itens de `projetos` carregam

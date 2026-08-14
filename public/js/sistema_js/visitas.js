@@ -14,22 +14,42 @@
 
     const consulta = { termo: '', periodo: 'hoje' };
 
+    const AGENDAR = { abrir: 'visita', rotulo: 'Agendar visita' };
+
+    /*
+     * Cada período explica a própria ausência. "Nenhum resultado" seria a
+     * mesma frase para seis situações diferentes, e nenhuma delas informa.
+     * Só os períodos em que agendar é a próxima ação oferecem o botão.
+     */
     const VAZIOS = {
         hoje: {
             titulo: 'Nenhuma visita hoje',
-            texto: 'A agenda de hoje está limpa. Veja "Próximas" para o que vem pela frente.'
+            texto: 'A agenda de hoje está limpa. Veja "Próximas" para o que vem pela frente.',
+            acao: AGENDAR
         },
         semana: {
             titulo: 'Nada nesta semana',
-            texto: 'Nenhum atendimento agendado para os próximos sete dias.'
+            texto: 'Nenhum atendimento agendado para os próximos sete dias.',
+            acao: AGENDAR
         },
         proximas: {
             titulo: 'Nenhuma visita agendada',
-            texto: 'Use "Nova visita" para marcar o próximo atendimento.'
+            texto: 'Marque o próximo atendimento e ele aparece aqui, e também no painel.',
+            acao: AGENDAR
         },
-        concluidas: { titulo: 'Nenhuma visita concluída', texto: 'Os atendimentos fechados aparecem aqui.' },
-        canceladas: { titulo: 'Nenhuma visita cancelada', texto: '' },
-        todas: { titulo: 'Nenhuma visita registrada', texto: '' }
+        concluidas: {
+            titulo: 'Nenhuma visita concluída',
+            texto: 'Os atendimentos fechados ficam registrados aqui e no histórico do equipamento.'
+        },
+        canceladas: {
+            titulo: 'Nenhuma visita cancelada',
+            texto: 'Visitas canceladas continuam no histórico do cliente, com o motivo.'
+        },
+        todas: {
+            titulo: 'Nenhuma visita registrada',
+            texto: 'A agenda da equipe começa vazia.',
+            acao: AGENDAR
+        }
     };
 
     let lista = null;

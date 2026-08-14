@@ -72,8 +72,15 @@
     function vazio(opcoes) {
         const dados = opcoes || {};
 
+        /*
+         * O estado vazio carrega a saída dele. Numa base recém-criada é ele que
+         * o usuário encontra em toda tela — deixá-lo só com um texto explicando
+         * a ausência empurraria a pessoa a procurar o botão em outro canto.
+         */
         const acao = dados.acao
-            ? `<button class="botao botao--secundario" type="button" data-acao="${escapar(dados.acao.acao)}"
+            ? `<button class="botao botao--secundario" type="button"
+                       data-abrir="${escapar(dados.acao.abrir)}"
+                       ${dados.acao.cliente ? `data-cliente="${escapar(dados.acao.cliente)}"` : ''}
                        data-pressionavel>${escapar(dados.acao.rotulo)}</button>`
             : '';
 

@@ -146,7 +146,12 @@
             ? C.agenda(visitas)
             : UI.vazio({
                 titulo: 'Sem visitas agendadas',
-                texto: 'Use "Agendar visita" para programar a próxima manutenção deste equipamento.'
+                texto: 'Programe a próxima manutenção desta máquina.',
+                acao: {
+                    abrir: 'visita',
+                    rotulo: 'Agendar visita',
+                    cliente: equipamento.cliente ? equipamento.cliente.id : ''
+                }
             }));
     }
 

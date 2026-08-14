@@ -3,6 +3,7 @@ const path = require('path');
 
 const seo = require('./shared/seo');
 const FRIOARTE = require('./shared/frioarte.dados');
+const { registrarPaginasAcesso } = require('./paginas_acesso');
 const { registrarPaginasSistema } = require('./paginas_sistema');
 
 const HTML = path.join(__dirname, '..', 'public', 'html', 'frioarte_html');
@@ -41,9 +42,10 @@ function registrarPaginas(app) {
     });
 
     /*
-     * Sistema interno. Fica fora do sitemap e barrado no robots de propósito:
-     * é ferramenta de trabalho, não conteúdo de busca.
+     * Acesso e sistema interno. Ficam fora do sitemap e barrados no robots de
+     * propósito: é ferramenta de trabalho, não conteúdo de busca.
      */
+    registrarPaginasAcesso(app);
     registrarPaginasSistema(app);
 }
 
@@ -86,6 +88,7 @@ function montarRobots() {
         '',
         // Material interno servido por engano não deveria virar resultado de busca.
         'Disallow: /api/',
+        'Disallow: /login',
         'Disallow: /sistema',
         '',
         `Sitemap: ${base}/sitemap.xml`,

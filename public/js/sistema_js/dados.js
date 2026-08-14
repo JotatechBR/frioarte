@@ -713,7 +713,9 @@
 
         registro.id = Number(registro.id);
         registro.clienteId = Number(registro.clienteId);
-        registro.tecnicoId = Number(registro.tecnicoId);
+        // Técnico é opcional: sem escolha, a visita fica "a definir" — e não
+        // com um id 0 que não corresponde a ninguém.
+        registro.tecnicoId = registro.tecnicoId ? Number(registro.tecnicoId) : null;
 
         guardar('visitas', 'id', registro);
 
@@ -753,7 +755,15 @@
         return `FA-${String(maior + 1).padStart(6, '0')}`;
     }
 
-    window.FrioArteDados = {
+    /*
+     * A camada inteira sai envolvida pelo diário: cada consulta e cada
+     * gravação vira uma linha no terminal, com duração e tamanho do resultado,
+     * sem que nenhuma função aqui saiba que está sendo observada.
+     *
+     * Quando estas funções virarem `fetch`, o registro continua valendo — e
+     * passa a medir a rede, que é justamente o que se vai querer medir.
+     */
+    const api = {
         carregarUsuario,
         carregarTecnicos,
         carregarClientes,
@@ -775,4 +785,10 @@
         atualizarStatusVisita,
         limparSimulacao
     };
+
+    // Se o diário não tiver subido, a camada sai crua. Sistema sem log funciona;
+    // sistema que não abre porque o log falhou, não.
+    window.FrioArteDados = window.FrioArteDiario
+        ? window.FrioArteDiario.envolver('dados', api)
+        : api;
 })();

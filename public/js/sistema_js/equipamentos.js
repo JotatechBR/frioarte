@@ -28,10 +28,13 @@
         UI.pintar(lista, equipamentos.length
             ? `<div class="fileiras">${equipamentos.map((item) => C.equipamento(item)).join('')}</div>`
             : UI.vazio({
-                titulo: 'Nenhum equipamento encontrado',
+                titulo: consulta.termo ? 'Nenhum equipamento encontrado' : 'Nenhum equipamento ainda',
                 texto: consulta.termo
                     ? `Nada corresponde a “${consulta.termo}”. O código tem o formato FA-000000.`
-                    : 'Nenhuma máquina neste filtro.'
+                    : 'Cadastre uma máquina para acompanhar instalação, manutenção e histórico.',
+                acao: consulta.termo || consulta.filtro !== 'todos'
+                    ? null
+                    : { abrir: 'equipamento', rotulo: 'Cadastrar equipamento' }
             }));
     }
 

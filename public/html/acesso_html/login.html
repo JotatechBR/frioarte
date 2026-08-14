@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <!--
+      `interactive-widget=resizes-content` faz o teclado virtual encolher a
+      viewport em vez de empurrar a página: com ele o `100dvh` desta tela passa
+      a valer o que sobra acima do teclado, e o campo em foco não fica embaixo
+      dele.
+    -->
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <title>Acesso ao sistema — Frio Arte Ar Condicionado</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="color-scheme" content="light only">
+    <link rel="icon" href="/midias/frioarte-simbolo.png" type="image/png">
+    <link rel="apple-touch-icon" href="/midias/frioarte-simbolo.png">
+
+    <link rel="stylesheet" href="/css/shared/variaveis.css">
+    <link rel="stylesheet" href="/css/shared/base.css">
+    <link rel="stylesheet" href="/css/acesso_css/login.css">
+</head>
+<body>
+
+    <main class="acesso">
+
+        <!-- Formulário ------------------------------------------------------
+             A metade que trabalha. Fica à esquerda, onde a leitura começa. -->
+        <section class="acesso__painel">
+            <div class="acesso__interno">
+
+                <header class="acesso__topo" data-entrada>
+                    <a class="marca" href="/" aria-label="Frio Arte Ar Condicionado — início">
+                        <img class="marca__logo acesso__logo" src="/midias/frioarte-marca.png"
+                             alt="Frio Arte Ar Condicionado" width="310" height="86">
+                    </a>
+                </header>
+
+                <div class="acesso__meio">
+                    <div class="acesso__bloco">
+                        <div class="acesso__cabeca">
+                            <p class="rotulo" data-entrada>Área restrita</p>
+                            <h1 class="acesso__titulo" data-entrada>Acesso ao sistema</h1>
+                        </div>
+
+                        <!--
+                          `method="post"` sem `action`: o envio é sempre impedido
+                          pelo script, mas se ele não carregar o navegador manda
+                          para a própria rota — e a senha nunca vai parar na
+                          barra de endereço, como iria num GET.
+                        -->
+                        <form class="acesso__forma" method="post" novalidate data-acesso>
+
+                            <div class="campo acesso__campo" data-entrada>
+                                <label class="campo__rotulo" for="acesso-usuario">Usuário</label>
+
+                                <span class="acesso__caixa">
+                                    <input class="campo__entrada acesso__entrada"
+                                           type="text" id="acesso-usuario" name="usuario"
+                                           autocomplete="username" autocapitalize="none"
+                                           autocorrect="off" spellcheck="false"
+                                           placeholder=" " required
+                                           aria-describedby="acesso-usuario-erro">
+                                </span>
+
+                                <p class="campo__erro acesso__erro" id="acesso-usuario-erro" hidden>
+                                    Informe o usuário para continuar.
+                                </p>
+                            </div>
+
+                            <div class="campo acesso__campo" data-entrada>
+                                <div class="acesso__rotulo-linha">
+                                    <label class="campo__rotulo" for="acesso-senha">Senha</label>
+
+                                    <button class="elo acesso__elo" type="button" data-esqueci>
+                                        Esqueci minha senha
+                                    </button>
+                                </div>
+
+                                <span class="acesso__caixa">
+                                    <input class="campo__entrada acesso__entrada acesso__entrada--senha"
+                                           type="password" id="acesso-senha" name="senha"
+                                           autocomplete="current-password"
+                                           placeholder=" " required
+                                           aria-describedby="acesso-senha-erro">
+
+                                    <button class="acesso__olho" type="button" data-ver-senha
+                                            aria-controls="acesso-senha" aria-pressed="false"
+                                            aria-label="Mostrar senha">
+                                        <svg data-olho="aberto" viewBox="0 0 24 24" fill="none"
+                                             stroke="currentColor" stroke-width="1.5"
+                                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M2.6 12C4.5 8.2 8 6 12 6s7.5 2.2 9.4 6c-1.9 3.8-5.4 6-9.4 6s-7.5-2.2-9.4-6Z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+
+                                        <svg data-olho="fechado" viewBox="0 0 24 24" fill="none"
+                                             stroke="currentColor" stroke-width="1.5"
+                                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M4.2 8.6C3.5 9.6 3 10.7 2.6 12c1.9 3.8 5.4 6 9.4 6 1 0 2-.1 2.9-.4"/>
+                                            <path d="M9.4 6.3C10.2 6.1 11.1 6 12 6c4 0 7.5 2.2 9.4 6-.8 1.7-2 3.1-3.4 4.1"/>
+                                            <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>
+                                            <path d="M4 4l16 16"/>
+                                        </svg>
+                                    </button>
+                                </span>
+
+                                <p class="campo__erro acesso__erro" id="acesso-senha-erro" hidden>
+                                    Informe a senha para continuar.
+                                </p>
+                            </div>
+
+                            <button class="botao botao--primario botao--grande acesso__enviar"
+                                    type="submit" data-pressionavel data-entrada>
+                                Entrar
+                            </button>
+
+                            <!--
+                              Área de recado da tela. Nasce vazia e some por CSS
+                              enquanto estiver assim — mas continua no documento,
+                              que é o que faz o leitor de tela anunciar o texto
+                              no instante em que ele aparece.
+                            -->
+                            <p class="acesso__recado" role="status" data-recado></p>
+                        </form>
+                    </div>
+                </div>
+
+                <footer class="acesso__pe" data-entrada>
+                    <a class="elo acesso__voltar" href="/">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M15 5l-7 7 7 7"/>
+                        </svg>
+                        Voltar ao site
+                    </a>
+
+                    <p class="acesso__restrito">Uso restrito à equipe Frio Arte.</p>
+                </footer>
+
+            </div>
+        </section>
+
+        <!-- Cena ------------------------------------------------------------
+             A metade que não pede nada: ar, luz fria e um instrumento de
+             precisão desenhado em fio. Só existe a partir do desktop — no
+             celular a atmosfera entra na própria tela clara. -->
+        <aside class="acesso__cena cena--escura">
+            <div class="acesso__ar" aria-hidden="true"></div>
+
+            <div class="acesso__cena-texto">
+                <p class="acesso__frase">
+                    <span class="linha"><span>O ambiente</span></span>
+                    <span class="linha"><span>sob controle.</span></span>
+                </p>
+
+                <p class="acesso__apoio" data-entrada>
+                    A ferramenta interna da equipe: cada cliente, cada máquina instalada
+                    e cada visita técnica no mesmo lugar.
+                </p>
+            </div>
+
+            <div class="acesso__cena-pe" data-entrada>
+                <div class="acesso__escala" aria-hidden="true"></div>
+
+                <p class="acesso__modulos">
+                    <span>Clientes</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Equipamentos</span>
+                    <span aria-hidden="true">·</span>
+                    <span>Visitas técnicas</span>
+                </p>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Só o toque nos botões e o comportamento do próprio formulário. -->
+    <script src="/js/shared/pressao.js"></script>
+    <script src="/js/acesso_js/login.js"></script>
+</body>
+</html>

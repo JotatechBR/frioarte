@@ -23,8 +23,13 @@
         const usuario = await D.carregarUsuario();
         const resumo = await D.carregarResumo();
 
-        document.querySelector('[data-saudacao]').textContent =
-            `${F.saudacao()}, ${F.primeiroNome(usuario.nome)}.`;
+        // Sem usuário identificado, cumprimenta sem nome. "Boa tarde, ." seria
+        // pior do que "Boa tarde."
+        document.querySelector('[data-saudacao]').textContent = usuario
+            ? `${F.saudacao()}, ${F.primeiroNome(usuario.nome)}.`
+            : `${F.saudacao()}.`;
+
+        ajustarAcaoPrincipal(resumo);
 
         const hoje = resumo.visitasHoje;
 
@@ -49,6 +54,21 @@
         ].join(''));
     }
 
+    /**
+     * A ação principal do painel segue o que dá para fazer agora. Sem nenhum
+     * cliente na base, "Agendar visita" abriria um formulário sem para quem
+     * agendar — o primeiro passo é o cadastro, e o botão diz isso.
+     */
+    function ajustarAcaoPrincipal(resumo) {
+        const botao = document.querySelector('[data-acao-principal]');
+        if (!botao) return;
+
+        const semClientes = resumo.clientes === 0;
+
+        botao.dataset.abrir = semClientes ? 'cliente' : 'visita';
+        botao.textContent = semClientes ? 'Cadastrar cliente' : 'Agendar visita';
+    }
+
     function numero(valor, rotulo) {
         return `<div class="numero">
             <span class="numero__valor">${F.doisDigitos(valor)}</span>
@@ -63,7 +83,8 @@
             ? C.agenda(visitas)
             : UI.vazio({
                 titulo: 'Nenhuma visita em aberto',
-                texto: 'Quando houver atendimento agendado, ele aparece aqui na ordem em que precisa acontecer.'
+                texto: 'Quando houver atendimento agendado, ele aparece aqui na ordem em que precisa acontecer.',
+                acao: { abrir: 'visita', rotulo: 'Agendar visita' }
             }));
     }
 
@@ -74,7 +95,7 @@
             ? `<div class="fileiras">${equipamentos.map((item) => C.equipamento(item)).join('')}</div>`
             : UI.vazio({
                 titulo: 'Nada pendente',
-                texto: 'Todos os equipamentos estão funcionando e dentro do prazo de manutenção.'
+                texto: 'Nenhum equipamento parado, com manutenção vencida ou perto do prazo.'
             }));
     }
 

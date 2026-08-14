@@ -32,6 +32,21 @@
                 if (raiz.dataset.cenaPronta !== 'true') delete raiz.dataset.cena;
             }, 2500);
         })();
+
+        /*
+         * Diário mudo, definido antes de tudo e substituído por diario.js quando
+         * ele carrega. Existe para que nenhum módulo precise perguntar se o log
+         * está lá antes de cada chamada — e para que um log que não subiu não
+         * leve o sistema junto.
+         */
+        window.FrioArteDiario = {
+            registrar: function () {},
+            envolver: function (onde, modulo) { return modulo; },
+            depuracao: function () {},
+            info: function () {},
+            aviso: function () {},
+            erro: function () {}
+        };
     </script>
 </head>
 <body class="app" data-secao="{{secao}}">
@@ -382,9 +397,12 @@
                     <span class="campo-forma__erro" data-campo-erro></span>
                 </label>
 
+                <!-- Sem `required`: marca-se a visita primeiro e decide-se
+                     quem vai depois. Exigir o técnico no agendamento travaria a
+                     agenda enquanto não houvesse ninguém cadastrado. -->
                 <label class="campo-forma">
                     <span class="campo-forma__rotulo">Técnico</span>
-                    <select class="campo-forma__entrada" name="tecnicoId" required data-lista-tecnicos></select>
+                    <select class="campo-forma__entrada" name="tecnicoId" data-lista-tecnicos></select>
                     <span class="campo-forma__erro" data-campo-erro></span>
                 </label>
 
@@ -564,6 +582,9 @@
 <script src="/js/sistema_js/data/equipamentos.mock.js" defer></script>
 <script src="/js/sistema_js/data/visitas.mock.js" defer></script>
 <script src="/js/sistema_js/data/equipe.mock.js" defer></script>
+
+<!-- Primeiro de todos: é ele que vigia as falhas dos outros. -->
+<script src="/js/sistema_js/diario.js" defer></script>
 
 <script src="/js/sistema_js/formato.js" defer></script>
 <script src="/js/sistema_js/dados.js" defer></script>

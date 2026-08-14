@@ -12,7 +12,10 @@
         <p class="abertura__data" data-data></p>
 
         <div class="abertura__acoes">
-            <button class="botao botao--primario" type="button" data-abrir="visita" data-pressionavel>
+            <!-- O rótulo e o destino são definidos por painel.js: com a base
+                 vazia, o primeiro passo é cadastrar cliente, não agendar. -->
+            <button class="botao botao--primario" type="button"
+                    data-abrir="visita" data-acao-principal data-pressionavel>
                 Agendar visita
             </button>
             <a class="botao botao--secundario" href="/sistema/visitas" data-pressionavel>Ver agenda</a>

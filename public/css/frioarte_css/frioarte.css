@@ -466,6 +466,35 @@
     opacity: 0.72;
 }
 
+/*
+ * Acesso da equipe ao sistema interno. É a linha mais quieta do rodapé: um
+ * ponto e duas palavras. Precisa existir, não precisa ser vista por quem veio
+ * pedir orçamento.
+ */
+.rodape__acesso {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-2);
+    margin-top: var(--e-4);
+    font-size: 0.8125rem;
+    color: var(--tinta-fraca);
+    opacity: 0.72;
+    transition: color 200ms ease, opacity 200ms ease;
+}
+
+.rodape__acesso::before {
+    content: '';
+    width: 0.3125rem;
+    height: 0.3125rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.rodape__acesso:hover {
+    color: var(--tinta);
+    opacity: 1;
+}
+
 /* ---------- Barra de ação no celular ----------
    Ao alcance do polegar. Sai de cena quando o rodapé já traz as mesmas ações,
    então nunca cobre conteúdo que a pessoa acabou de alcançar. */

@@ -103,7 +103,8 @@
                 .map((item) => C.equipamento(item, { semCliente: true })).join('')}</div>`
             : UI.vazio({
                 titulo: 'Sem equipamentos',
-                texto: 'Cadastre a primeira máquina para acompanhar instalação, manutenção e histórico.'
+                texto: 'Cadastre a primeira máquina para acompanhar instalação, manutenção e histórico.',
+                acao: { abrir: 'equipamento', rotulo: 'Adicionar equipamento', cliente: cliente.id }
             }));
     }
 
@@ -120,7 +121,8 @@
             ? C.agenda(visitas)
             : UI.vazio({
                 titulo: 'Sem visitas agendadas',
-                texto: 'Use "Nova visita" para marcar o próximo atendimento deste cliente.'
+                texto: 'Marque o próximo atendimento deste cliente.',
+                acao: { abrir: 'visita', rotulo: 'Nova visita', cliente: cliente.id }
             }));
     }
 
