@@ -10,7 +10,7 @@
         "usuario": "node scripts/usuario.js"
     },
     "engines": {
-        "node": "24.13.0"
+        "node": "24.x"
     },
     "dependencies": {
         "bcryptjs": "^3.0.3",
