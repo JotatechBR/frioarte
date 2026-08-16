@@ -94,4 +94,8 @@ function enderecosDaRede() {
         .map((placa) => placa.address);
 }
 
-module.exports = { app, iniciar };
+module.exports = app;
+
+// Mantém compatibilidade caso algum arquivo use { app, iniciar }
+module.exports.app = app;
+module.exports.iniciar = iniciar;
