@@ -186,6 +186,56 @@
         </a>`;
     }
 
+    /* ---------- Usuário ----------
+       Uma linha da equipe. Diferente das outras fileiras do sistema, esta não
+       leva a lugar nenhum: um usuário não tem ficha, tem ações. Por isso é
+       <article> com botões, e não <a> com seta. */
+
+    function usuario(dados, opcoes) {
+        const config = opcoes || {};
+        const voce = Number(config.voceId) === dados.id;
+
+        /*
+         * Na própria linha sobra só "Editar". Desativar e excluir a si mesmo
+         * são recusados pelo servidor — mostrar os botões para depois explicar
+         * que não funcionam seria oferecer duas portas trancadas.
+         */
+        const acoes = [
+            `<button class="acao-linha" type="button"
+                     data-abrir="usuario" data-id="${dados.id}">Editar</button>`
+        ];
+
+        if (!voce) {
+            acoes.push(`<button class="acao-linha" type="button"
+                        data-usuario-acesso="${dados.id}"
+                        data-ativo="${dados.ativo ? 'true' : 'false'}">${dados.ativo ? 'Tirar acesso' : 'Dar acesso'}</button>`);
+
+            acoes.push(`<button class="acao-linha acao-linha--ruim" type="button"
+                        data-usuario-excluir="${dados.id}">Excluir</button>`);
+        }
+
+        return `<article class="fileira fileira--acoes" data-ativo="${dados.ativo ? 'true' : 'false'}">
+            <div class="quem">
+                <span class="quem__iniciais" aria-hidden="true">${escapar(F.iniciais(dados.nome))}</span>
+                <div class="quem__texto">
+                    <p class="fileira__nome">${escapar(dados.nome)}${voce
+                        ? '<span class="quem__voce">você</span>'
+                        : ''}</p>
+                    <p class="quem__acesso numeral">${escapar(dados.usuario)}</p>
+                </div>
+            </div>
+
+            <div class="fileira__dados">
+                <span>${escapar(dados.funcao)}</span>
+                ${UI.marca('usuario', dados.ativo ? 'ativo' : 'inativo')}
+            </div>
+
+            <div class="fileira__fim">
+                <div class="acoes-linha">${acoes.join('')}</div>
+            </div>
+        </article>`;
+    }
+
     /* ---------- Histórico ---------- */
 
     function evento(item) {
@@ -218,6 +268,7 @@
         agenda,
         equipamento,
         cliente,
+        usuario,
         historico
     };
 })();

@@ -13,6 +13,25 @@ npm start
 
 Depois abra `http://localhost:3000`.
 
+O sistema interno precisa de um usuário para entrar, e a tabela `usuarios` nasce
+vazia. O primeiro usuário se cria fora do navegador — a tela que cadastra
+usuários fica atrás do login, então sem esta porta o sistema tranca a chave do
+lado de dentro. Crie-o como **Administrador**: é a função que libera
+`/sistema/usuarios`, de onde saem todos os outros.
+
+```bash
+npm run usuario -- criar <usuario> <senha> "<nome>" "Administrador"
+npm run usuario -- listar
+npm run usuario -- funcao <usuario> <funcao>   # promove ou rebaixa
+npm run usuario -- senha <usuario> <nova-senha>
+npm run usuario -- ativar|desativar <usuario>
+```
+
+Do segundo usuário em diante o caminho normal é a tela, não o terminal — a senha
+digitada no comando fica no histórico do shell. O `funcao` existe como válvula de
+escape: se a última conta de administrador for rebaixada por engano, ninguém
+promove ninguém pelo navegador, e é este comando que destrava.
+
 O servidor escuta em `0.0.0.0`, então também responde pelo IP da máquina na rede
 local — é assim que o técnico abre `/sistema` no celular. Ao subir, ele imprime
 os endereços de rede disponíveis. Para restringir só a esta máquina, use
@@ -89,17 +108,17 @@ public/html/sistema_html/
 ├── painel.html          Miolo de cada tela; api/paginas_sistema.js compõe layout + miolo
 ├── clientes.html · cliente.html
 ├── equipamentos.html · equipamento.html
-└── visitas.html
+├── visitas.html
+└── usuarios.html       Administração da equipe (restrita)
 
 public/js/sistema_js/
-├── data/*.mock.js       Clientes, equipamentos, visitas e equipe
 ├── formato.js           Datas, máscaras, "instalado há 1 ano e 4 meses"
-├── dados.js             Camada de dados: consultas, junções, gravação (a fronteira da API)
+├── dados.js             Camada de dados: fala com /api, traduz nomes, cruza as listas
 ├── interface.js         Estados, esqueleto, folhas, avisos, validação
-├── cartoes.js           Visita, equipamento, cliente e histórico — usados por várias telas
-├── formularios.js       Os três cadastros e o detalhe da visita
+├── cartoes.js           Visita, equipamento, cliente, usuário e histórico — usados por várias telas
+├── formularios.js       Os cadastros, a confirmação e o detalhe da visita
 ├── navegacao.js         Navegação, perfil, busca global e sino
-└── painel|clientes|cliente|equipamentos|equipamento|visitas.js
+└── painel|clientes|cliente|equipamentos|equipamento|visitas|usuarios.js
 ```
 
 | Rota                             | Tela                             |
@@ -110,22 +129,53 @@ public/js/sistema_js/
 | `/sistema/equipamentos`          | Lista com busca e filtros        |
 | `/sistema/equipamentos/:codigo`  | Ficha da máquina (`FA-000028`)   |
 | `/sistema/visitas`               | Agenda por período               |
+| `/sistema/usuarios`              | Equipe e acesso — **só administradores** |
+
+### Quem administra
+
+Não há coluna de papel na tabela: quem manda é quem tem função de administrador
+(`Administrador`, `Dono`, `Diretor`, `Gestor` e variantes — a lista está em
+`api/middleware/exigirAdministrador.js`, comparada sem acento e sem caixa).
+
+A regra vale em três camadas, e as três são independentes de propósito:
+
+| Camada                            | O que faz                                                |
+| --------------------------------- | -------------------------------------------------------- |
+| `api/paginas_sistema.js`          | Desvia para `/sistema` quem digitar a rota sem ser admin  |
+| `api/rota_usuarios/rota_usuarios.js` | 403 em criar, editar, ativar e excluir                 |
+| `data-admin` no `<body>` + CSS    | O menu "Administração" não chega ao navegador dos outros  |
+
+`GET /api/usuarios` continua aberto a qualquer sessão: é ele que preenche o
+campo "Técnico" do agendamento de visita, e fechá-lo quebraria a agenda de todo
+mundo para esconder um nome que já aparece no cartão da visita ao lado.
+
+Duas ações são recusadas até para administradores: **desativar e excluir a
+própria conta**. As duas derrubam a sessão no pedido seguinte e deixam a pessoa
+no login sem caminho de volta — se for mesmo o caso, outro administrador faz, ou
+o `npm run usuario` faz do lado de fora.
+
+Desativar e excluir também não são a mesma coisa: desativar fecha a porta e
+guarda o histórico (o nome do técnico continua nas visitas dele); excluir só
+funciona para quem nunca apareceu em visita nenhuma, porque a chave estrangeira
+recusa o resto — e o servidor traduz essa recusa em português.
 
 Detalhes que valem saber:
 
 - **Nada é escrito à mão que possa ser calculado**: tempo de instalação,
   atraso, "em 30 minutos", próxima visita e os avisos do sino saem todos das
   datas. Nenhum desses rótulos é campo do registro.
-- **O que se cadastra durante a sessão** fica em `sessionStorage`, só as
-  alterações — sobrevive à navegação entre telas e some ao fechar a aba. É o
-  substituto temporário do banco, não um recurso do produto.
+- **Tudo que se cadastra vai para o MySQL.** `dados.js` é a única parte do
+  frontend que conhece a rede: as telas pedem `carregarClientes()` e recebem o
+  objeto pronto, sem saber que houve um `fetch`. Ele também é a fronteira entre
+  os dois vocabulários — o banco fala `cliente_id` e `data_instalacao`, as telas
+  falam `clienteId` e `dataInstalacao`, e a tradução acontece só ali.
+- **O código `FA-000000` nasce no servidor**, sob trava de banco: dois cadastros
+  simultâneos não podem receber a mesma etiqueta.
 - **Base vazia é estado normal, não erro.** Toda tela tem um estado vazio que
   explica a ausência e oferece a próxima ação; o painel troca a ação principal
   para "Cadastrar cliente" enquanto não houver nenhum.
-- **Sem usuário logado**, o rodapé da lateral some e o painel cumprimenta sem
-  nome. O perfil volta quando existir autenticação.
 - **Técnico não é obrigatório** ao agendar: marca-se a visita e define-se quem
-  vai depois. Enquanto `equipe.mock.js` estiver vazio, toda visita fica "a
+  vai depois. Enquanto não houver usuário ativo cadastrado, toda visita fica "a
   definir".
 - O sistema está fora do `sitemap.xml` e barrado no `robots.txt`.
 
@@ -216,14 +266,69 @@ propósito: a quebra de linha faz parte da composição, não do texto.
 
 ## Rotas
 
+Públicas:
+
 | Método | Rota            | Retorno                                   |
 | ------ | --------------- | ----------------------------------------- |
 | GET    | `/`             | Home, com o bloco de SEO injetado          |
-| GET    | `/sistema/*`    | Sistema interno (ver seção acima)         |
+| GET    | `/login`        | Tela de acesso (desvia para `/sistema` se já entrou) |
 | GET    | `/api/frioarte` | `{ sucesso: true, dados: { ...perfil } }` |
+| POST   | `/api/acesso/login` | Confere a senha e devolve o cookie de sessão |
 | GET    | `/robots.txt`   | Gerado a partir do domínio nos dados      |
 | GET    | `/sitemap.xml`  | Uma entrada; `lastmod` = data do conteúdo |
 | —      | qualquer outra  | `404.html`                                |
+
+Atrás da sessão — sem cookie válido, a API responde 401 e a página desvia para
+`/login?destino=…`:
+
+| Método            | Rota                        | Retorno                        |
+| ----------------- | --------------------------- | ------------------------------ |
+| GET               | `/sistema/*`                | Sistema interno (ver seção acima) |
+| GET               | `/api/acesso/eu`            | Quem está com a sessão aberta  |
+| POST              | `/api/acesso/sair`          | Encerra a sessão               |
+| GET/POST/PUT/DEL  | `/api/clientes`             | CRUD de clientes               |
+| GET/POST/PUT/DEL  | `/api/equipamentos`         | CRUD de equipamentos           |
+| GET/POST/PUT/DEL  | `/api/visitas`              | CRUD de visitas                |
+| GET               | `/api/usuarios`             | Lista da equipe (preenche o campo "Técnico") |
+| POST              | `/api/sistema/registros`    | Diário vindo do navegador      |
+
+Atrás da sessão **e** da função de administrador — as demais respondem 403:
+
+| Método       | Rota                        | Retorno                              |
+| ------------ | --------------------------- | ------------------------------------ |
+| GET          | `/sistema/usuarios`         | Tela de administração da equipe      |
+| POST         | `/api/usuarios`             | Cria usuário                         |
+| GET/PUT/DEL  | `/api/usuarios/:id`         | Lê, edita e exclui                   |
+| PATCH        | `/api/usuarios/:id/status`  | Dá ou tira o acesso                  |
+
+## Acesso
+
+A sessão é um **cookie assinado** (`HttpOnly`, `SameSite=Lax`), e não um registro
+em tabela: o que precisa ser lembrado entre um pedido e outro é só *quem* está do
+outro lado. O cookie carrega o id do usuário e a hora de vencer — nome, função e
+situação são lidos do banco a cada pedido, porque mudam enquanto a sessão está
+aberta. Um usuário desativado às 14h perde o acesso às 14h, não quando o cookie
+vencer.
+
+A senha tem piso de **8 caracteres** e teto de 72 bytes, nos dois caminhos que a
+gravam (a tela e o `npm run usuario`). O teto não é escolha: o bcrypt descarta em
+silêncio tudo que passa disso, e senha truncada sem aviso é pior que senha
+recusada.
+
+A senha é guardada como hash **bcrypt** (custo 12) e nunca sai da tabela.
+Usuário inexistente, senha errada e conta desativada devolvem a mesma frase —
+"Usuário ou senha inválidos" — e levam o mesmo tempo para responder: distinguir
+os casos, no texto ou no relógio, entregaria a lista de quem tem conta. Oito
+tentativas erradas em 15 minutos, por usuário e origem, param em 429.
+
+No `.env`:
+
+- `SESSAO_SEGREDO` — assina o cookie, mínimo 32 caracteres. Ausente, o processo
+  sorteia um a cada início: funciona, mas toda reinicialização desloga quem
+  estava usando. Trocá-lo é como se encerram todas as sessões de uma vez.
+- `SESSAO_HORAS` — duração da sessão. Ausente = 12, um turno de trabalho.
+- `SESSAO_SEGURA` — só ligar atrás de HTTPS. Um cookie `Secure` não é enviado
+  por HTTP, e o login passaria a falhar sem mensagem de erro.
 
 ## Horário de funcionamento
 
@@ -288,10 +393,6 @@ Se um dia for preciso guardar os pedidos, o caminho é criar `api/rota_orcamento
 com repository e uma tabela — a estrutura do projeto já comporta.
 
 ## Pendências
-
-- **Integração do frontend e autenticação.** O banco e o CRUD da API já estão
-  prontos; `dados.js` ainda usa a simulação de sessão e a tela de login ainda
-  não cria uma sessão autenticada.
 
 - **Fotografia.** Todas as imagens do site são geradas por IA, usadas como
   referência de ambiente com o aval da empresa. Os itens de `projetos` carregam

@@ -33,9 +33,9 @@
         const bloco = document.querySelector('.lateral__pe');
 
         /*
-         * Sem usuário — hoje, sempre; depois, só antes de autenticar — o rodapé
-         * da lateral sai inteiro. Um avatar vazio com duas linhas em branco é
-         * pior do que espaço nenhum.
+         * Sem usuário — sessão vencida, ou banco fora do ar no instante da
+         * consulta — o rodapé da lateral sai inteiro. Um avatar vazio com duas
+         * linhas em branco é pior do que espaço nenhum.
          */
         if (!usuario) {
             if (bloco) bloco.hidden = true;
@@ -323,12 +323,30 @@
         </button>`;
     }
 
+    /**
+     * Sair.
+     *
+     * O botão desliga a si mesmo antes de chamar: `sair()` termina numa troca de
+     * endereço, e nesse intervalo um segundo clique dispararia um segundo pedido
+     * para encerrar uma sessão que já acabou.
+     */
+    function ligarSaida() {
+        const botao = document.querySelector('[data-sair]');
+        if (!botao) return;
+
+        botao.addEventListener('click', () => {
+            botao.disabled = true;
+            D.sair();
+        });
+    }
+
     /* ---------- Arranque ---------- */
 
     document.addEventListener('DOMContentLoaded', () => {
         marcarSecao();
 
         tentar('perfil', mostrarUsuario);
+        tentar('saída', ligarSaida);
         tentar('título', observarTitulo);
         tentar('rolagem', ligarRolagem);
         tentar('busca', ligarBusca);

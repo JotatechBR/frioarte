@@ -118,6 +118,14 @@
     display: none;
 }
 
+/*
+ * "Entrar" e "Solicitar orçamento" são um par: andam juntos, e o respiro entre
+ * eles é menor que o do cabeçalho, senão leem como duas coisas sem relação.
+ */
+.chrome__acao + .chrome__acao {
+    margin-inline-start: calc(var(--e-3) - var(--e-5));
+}
+
 .chrome__menu {
     display: grid;
     place-items: center;
@@ -219,6 +227,12 @@
     font-weight: 650;
     letter-spacing: -0.028em;
     border-bottom: 1px solid var(--fio);
+}
+
+.menu__acoes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--e-3);
 }
 
 .menu__painel .botao {

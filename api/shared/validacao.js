@@ -135,10 +135,23 @@ function hora(valor, campo = 'hora') {
     return `${partes[1]}:${partes[2]}:${partes[3] || '00'}`;
 }
 
+/**
+ * O piso de 8 caracteres é o mesmo que `scripts/usuario.js` já exigia. Agora que
+ * existe uma tela criando usuários, ele precisa valer nos dois caminhos — senão
+ * a regra seria apenas uma sugestão que o navegador ignora.
+ *
+ * O teto de 72 bytes não é escolha: o bcrypt descarta silenciosamente tudo o
+ * que passa disso, e uma senha truncada sem aviso é pior do que uma recusada.
+ */
+const SENHA_MINIMA = 8;
+
 function senha(valor, obrigatoria = true) {
     if (valor === undefined && !obrigatoria) return undefined;
     if (typeof valor !== 'string' || !valor.trim()) {
         throw erroHttp(400, 'O campo senha é obrigatório.');
+    }
+    if (valor.length < SENHA_MINIMA) {
+        throw erroHttp(400, `A senha deve ter ao menos ${SENHA_MINIMA} caracteres.`);
     }
     if (Buffer.byteLength(valor, 'utf8') > 72) {
         throw erroHttp(400, 'A senha deve ter no máximo 72 bytes.');
@@ -161,6 +174,7 @@ function codigoEquipamento(valor, opcional = false) {
 }
 
 module.exports = {
+    SENHA_MINIMA,
     corpo,
     camposPermitidos,
     textoObrigatorio,

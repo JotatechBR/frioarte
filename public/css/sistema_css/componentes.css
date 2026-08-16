@@ -48,6 +48,22 @@
     box-shadow: 0 0 0 2px var(--branco);
 }
 
+/*
+ * Botão de ação destrutiva.
+ *
+ * Vermelho cheio, e só ele: no sistema inteiro existe exatamente um botão desta
+ * cor por vez, dentro da folha de confirmação. Espalhar vermelho pela interface
+ * gastaria o único sinal que faz alguém parar antes de clicar.
+ */
+.botao--perigo {
+    background: var(--tom-ruim);
+    color: #fff;
+}
+
+.botao--perigo:hover {
+    background: #8e211a;
+}
+
 /* Ação de texto com seta — o "ver mais" do sistema inteiro. */
 .elo-seta {
     display: inline-flex;
@@ -1035,6 +1051,20 @@
     margin: 0 0 var(--e-2);
 }
 
+/*
+ * Texto da confirmação. Medida curta de propósito: quem está prestes a apagar
+ * alguma coisa não lê uma linha de 90 caracteres — lê duas frases ou nenhuma.
+ */
+.confirmar__texto {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    color: var(--tinta-media);
+    max-width: 42ch;
+    text-wrap: pretty;
+}
+
 .detalhe__elo {
     color: var(--acento);
 }
@@ -1116,6 +1146,22 @@
     margin: 0 0 var(--e-5);
     font-size: 0.875rem;
     color: var(--tinta-fraca);
+}
+
+/*
+ * Nota que só aparece quando a escolha do formulário tem consequência — o
+ * "sem acesso" do cadastro de usuário. Fica presa à esquerda por um fio, e não
+ * dentro de uma caixa âmbar: caixa colorida em formulário vira ruído de fundo
+ * na terceira vez que se abre a tela.
+ */
+.forma__aviso {
+    margin: var(--e-4) 0 0;
+    padding-left: var(--e-4);
+    border-left: 2px solid var(--tom-atencao-luz);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--tinta-media);
+    max-width: 46ch;
 }
 
 .campo-forma {

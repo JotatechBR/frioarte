@@ -1,0 +1,47 @@
+    <div class="pagina">
+        <div class="pagina__texto">
+            <h1 class="pagina__titulo" data-titulo>Usuários</h1>
+            <p class="pagina__sub">
+                Quem entra no sistema, com que nome de acesso
+                e até quando.
+            </p>
+        </div>
+
+        <div class="pagina__acoes">
+            <button class="botao botao--primario" type="button" data-abrir="usuario" data-pressionavel>
+                <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-mais"/></svg>
+                Novo usuário
+            </button>
+        </div>
+    </div>
+
+    <div class="controles">
+        <label class="campo-busca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-busca"/></svg>
+            <input type="search" data-procurar autocomplete="off"
+                   placeholder="Nome, nome de acesso ou função"
+                   aria-label="Buscar usuários">
+        </label>
+
+        <nav class="filtros" data-filtros aria-label="Filtrar usuários">
+            <button class="filtro" type="button" data-filtro="todos" data-ativo="true">Todos</button>
+            <button class="filtro" type="button" data-filtro="ativos">Com acesso</button>
+            <button class="filtro" type="button" data-filtro="inativos">Sem acesso</button>
+            <button class="filtro" type="button" data-filtro="administradores">Administradores</button>
+        </nav>
+    </div>
+
+    <p class="contagem" data-contagem aria-live="polite"></p>
+
+    <div data-lista="usuarios"></div>
+
+    <!--
+      A nota fecha a tela em vez de abrir: no topo ela seria um parágrafo de
+      manual entre o título e a primeira ação. Aqui embaixo é onde alguém olha
+      depois de tentar excluir a própria conta e não conseguir.
+    -->
+    <p class="rodape-tela">
+        Desativar guarda o histórico e tira o acesso; excluir só é possível
+        para quem nunca apareceu em uma visita. A própria conta não pode ser
+        desativada nem excluída daqui — peça a outro administrador.
+    </p>

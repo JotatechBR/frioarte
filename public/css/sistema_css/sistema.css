@@ -121,6 +121,23 @@ html[data-travado] {
     margin-bottom: var(--e-3);
 }
 
+/* Rótulo de um grupo que vem depois de outro: precisa do ar que o separa. */
+.lateral__grupo--adiante {
+    margin-top: var(--e-5);
+}
+
+/*
+ * Administração só existe para quem administra.
+ *
+ * O `data-admin` do <body> é montado pelo servidor, então o item nunca chega ao
+ * navegador de quem não pode vê-lo piscando antes de sumir. Esconder aqui é
+ * higiene de tela, não segurança: quem manda de verdade são a rota da página e
+ * o middleware da API.
+ */
+.app[data-admin='false'] [data-so-admin] {
+    display: none;
+}
+
 /*
  * Item de menu sem caixa. O selecionado se distingue por tinta cheia, peso e
  * um traço curto na margem — o suficiente para ser inequívoco e discreto.
@@ -221,6 +238,38 @@ html[data-travado] {
 .perfil__texto small {
     font-size: 0.75rem;
     color: var(--tinta-fraca);
+}
+
+/*
+ * Sair é uma saída, não uma ação do dia: fica discreto até a mão chegar perto.
+ * `margin-left: auto` o encosta na borda, longe do nome — ninguém deve sair do
+ * sistema tentando clicar no próprio perfil.
+ */
+.perfil__sair {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--tinta-fraca);
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+.perfil__sair svg {
+    width: 1.125rem;
+    height: 1.125rem;
+}
+
+.perfil__sair:hover,
+.perfil__sair:focus-visible {
+    background: var(--fundo-fraco, rgba(0, 0, 0, 0.05));
+    color: var(--tinta);
 }
 
 /* ============================================================
@@ -527,7 +576,13 @@ html[data-travado] {
     inset: auto 0 0 0;
     z-index: 40;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /*
+     * Colunas contadas pelo que existe, e não fixadas em quatro: para o
+     * administrador a barra tem cinco itens, e uma quinta coluna espremida
+     * numa grade de quatro sairia por baixo da tela.
+     */
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
     padding-bottom: env(safe-area-inset-bottom);
     background: var(--vidro);
     backdrop-filter: var(--desfoque-chrome);

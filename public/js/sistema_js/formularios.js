@@ -1,7 +1,7 @@
 /**
  * Cadastros e detalhe de visita.
  *
- * Os três formulários do sistema — cliente, visita e equipamento — vivem no
+ * Os formulários do sistema — cliente, visita, equipamento e usuário — vivem no
  * layout, e não em cada tela. Assim "Nova visita" funciona igual no painel, na
  * ficha do cliente e na lista de visitas, sem três cópias do mesmo formulário
  * saindo de sincronia.
@@ -10,6 +10,7 @@
  *
  *     <button data-abrir="visita" data-cliente="7" data-equipamento="FA-000028">
  *     <button data-abrir="cliente" data-id="7">
+ *     <button data-abrir="usuario" data-id="7">
  *     <button data-visita="103">          (abre o detalhe)
  *
  * Ao salvar, dispara `sistema:atualizado` no documento. Cada tela decide se
@@ -333,6 +334,97 @@
         avisarMudanca('equipamento', registro);
     }
 
+    /* ---------- Usuário ---------- */
+
+    async function abrirUsuario(id) {
+        anotarAbertura('usuario', id);
+
+        const alvo = dialogo('usuario');
+        const forma = alvo.querySelector('[data-forma="usuario"]');
+
+        forma.reset();
+        limparErros(forma);
+
+        const editando = Boolean(id);
+        const usuario = editando ? await D.carregarUsuarioPorId(id) : null;
+
+        if (editando && !usuario) {
+            LOG.aviso('usuario', 'edicao-inexistente', { alvo: id });
+            UI.notificar({ titulo: 'Este usuário não existe mais.', tom: 'ruim' });
+            return;
+        }
+
+        alvo.querySelector('[data-forma-rotulo]').textContent = editando ? 'Editar' : 'Acesso';
+        alvo.querySelector('[data-forma-titulo]').textContent = editando ? usuario.nome : 'Novo usuário';
+        alvo.querySelector('[data-forma-enviar]').textContent = editando
+            ? 'Salvar alterações'
+            : 'Criar usuário';
+
+        /*
+         * A senha é obrigatória só na criação. Na edição, em branco quer dizer
+         * "mantenha a que está lá" — e o campo precisa dizer isso, porque um
+         * campo de senha vazio num formulário de edição parece um dado perdido.
+         */
+        const senha = forma.querySelector('[data-campo-senha]');
+
+        senha.required = !editando;
+        senha.placeholder = editando
+            ? 'Deixe em branco para manter a atual'
+            : 'Ao menos 8 caracteres';
+
+        alvo.querySelector('[data-forma-nota]').textContent = editando
+            ? 'Nem o sistema conhece a senha atual — só o resumo dela. Para trocar, digite uma nova.'
+            : 'A pessoa entra em /login com o nome de acesso e a senha definidos aqui.';
+
+        preencherFormulario(forma, {
+            id: usuario ? usuario.id : '',
+            nome: usuario ? usuario.nome : '',
+            usuario: usuario ? usuario.usuario : '',
+            funcao: usuario ? usuario.funcao : 'Técnico',
+            senha: '',
+            ativo: usuario ? String(usuario.ativo) : 'true'
+        });
+
+        mostrarAvisoDeAcesso(forma);
+
+        UI.abrirDialogo(alvo);
+    }
+
+    /** O aviso sobre desativar só aparece quando "sem acesso" está escolhido. */
+    function mostrarAvisoDeAcesso(forma) {
+        const aviso = forma.querySelector('[data-forma-aviso]');
+        const escolhido = forma.querySelector('[name="ativo"]:checked');
+
+        if (aviso) aviso.hidden = !escolhido || escolhido.value !== 'false';
+    }
+
+    async function salvarUsuario(forma) {
+        const dados = UI.lerFormulario(forma);
+
+        const registro = await D.salvarUsuario({
+            id: dados.id || null,
+            nome: dados.nome,
+            /*
+             * O nome de acesso vai como foi escrito. Rebaixá-lo para minúsculas
+             * aqui reescreveria silenciosamente o login de quem já está
+             * cadastrado com maiúscula toda vez que alguém corrigisse um
+             * sobrenome — e não compraria nada: a coluna é `ai_ci`, então a
+             * caixa nunca decidiu quem entra.
+             */
+            usuario: dados.usuario,
+            funcao: dados.funcao,
+            senha: dados.senha ? dados.senha : undefined,
+            ativo: dados.ativo === 'true'
+        });
+
+        UI.notificar({
+            titulo: dados.id ? 'Usuário atualizado.' : 'Usuário criado com sucesso.',
+            texto: `${registro.nome} · ${registro.usuario}`
+        });
+
+        avisarMudanca('usuario', registro);
+    }
+
     /* ---------- Detalhe da visita ----------
        Uma visita não merece uma página inteira: o que se faz com ela é ligar,
        conferir endereço e fechar o atendimento. Isso cabe numa folha. */
@@ -461,7 +553,18 @@
                 UI.fecharDialogo(forma.closest('dialog'));
             } catch (erro) {
                 LOG.erro('cadastro', `falhou-${nome}`, { mensagem: erro && erro.message });
-                UI.notificar({ titulo: 'Não foi possível salvar.', tom: 'ruim' });
+
+                /*
+                 * A recusa do servidor vai junto. "Já existe um usuário com
+                 * esse nome de acesso" e "você não pode excluir a própria
+                 * conta" são instruções: sem elas, "Não foi possível salvar"
+                 * deixa a pessoa tentando de novo exatamente a mesma coisa.
+                 */
+                UI.notificar({
+                    titulo: 'Não foi possível salvar.',
+                    texto: erro && erro.message,
+                    tom: 'ruim'
+                });
             } finally {
                 botao.disabled = false;
                 delete botao.dataset.ocupado;
@@ -483,12 +586,18 @@
                 preencherEquipamentos(equipamentos, cliente.value);
             });
         }
+
+        // O aviso sobre tirar o acesso acompanha a escolha, não a abertura.
+        forma.querySelectorAll('[name="ativo"]').forEach((opcao) => {
+            opcao.addEventListener('change', () => mostrarAvisoDeAcesso(forma));
+        });
     }
 
     function iniciar() {
         ligarFormulario('cliente', salvarCliente);
         ligarFormulario('visita', salvarVisita);
         ligarFormulario('equipamento', salvarEquipamento);
+        ligarFormulario('usuario', salvarUsuario);
 
         /*
          * Um ouvinte só, no documento: os botões que abrem formulário nascem e
@@ -513,6 +622,7 @@
                 if (dados.abrir === 'equipamento') {
                     abrirEquipamento({ codigo: dados.codigo || null, clienteId: dados.cliente || null });
                 }
+                if (dados.abrir === 'usuario') abrirUsuario(dados.id || null);
 
                 return;
             }
@@ -558,6 +668,7 @@
         abrirCliente,
         abrirVisita,
         abrirEquipamento,
+        abrirUsuario,
         abrirDetalheVisita
     };
 })();

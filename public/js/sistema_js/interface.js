@@ -31,6 +31,16 @@
             ativo: { rotulo: 'Ativo', tom: 'bom' },
             inativo: { rotulo: 'Inativo', tom: 'neutro' }
         },
+        /*
+         * Família própria, e não a de cliente com outro nome: para um cliente
+         * "inativo" quer dizer que não é mais atendido; para um usuário quer
+         * dizer que a senha dele parou de abrir a porta. Mesmo par de valores,
+         * duas frases diferentes na tela.
+         */
+        usuario: {
+            ativo: { rotulo: 'Com acesso', tom: 'bom' },
+            inativo: { rotulo: 'Sem acesso', tom: 'neutro' }
+        },
         agenda: {
             atrasada: { rotulo: 'Atrasada', tom: 'ruim' },
             hoje: { rotulo: 'Hoje', tom: 'ativo' },
@@ -227,6 +237,63 @@
         });
     }
 
+    /* ---------- Confirmação ----------
+       Uma pergunta antes de uma ação sem volta. Devolve uma promessa que
+       resolve `true` só no botão de confirmar: fechar pelo véu, pelo X, pelo
+       Cancelar ou pelo Esc é sempre "não", e é assim que tem que ser — o
+       caminho fácil de sair de uma pergunta destrutiva é o que não destrói. */
+
+    function confirmar(opcoes) {
+        const dados = opcoes || {};
+        const alvo = document.querySelector('[data-dialogo="confirmar"]');
+
+        // Sem a folha no layout a resposta é não. Não perguntar e agir seria
+        // trocar uma confirmação quebrada por uma exclusão silenciosa.
+        if (!alvo) return Promise.resolve(false);
+
+        alvo.querySelector('[data-confirmar-rotulo]').textContent = dados.rotulo || 'Confirmar';
+        alvo.querySelector('[data-confirmar-titulo]').textContent = dados.titulo || 'Tem certeza?';
+        alvo.querySelector('[data-confirmar-texto]').textContent = dados.texto || '';
+
+        const sim = alvo.querySelector('[data-confirmar-sim]');
+
+        sim.textContent = dados.acao || 'Confirmar';
+        sim.classList.toggle('botao--perigo', dados.tom === 'ruim');
+        sim.classList.toggle('botao--primario', dados.tom !== 'ruim');
+
+        return new Promise((entregar) => {
+            let respondido = false;
+
+            function responder(valor) {
+                if (respondido) return;
+                respondido = true;
+
+                sim.removeEventListener('click', aceitar);
+                alvo.removeEventListener('close', recusar);
+
+                entregar(valor);
+            }
+
+            function aceitar() {
+                responder(true);
+                fecharDialogo(alvo);
+            }
+
+            /*
+             * O `close` do <dialog> cobre todas as saídas de uma vez — Esc,
+             * véu, X e Cancelar passam por ele. Um ouvinte, quatro caminhos.
+             */
+            function recusar() {
+                responder(false);
+            }
+
+            sim.addEventListener('click', aceitar);
+            alvo.addEventListener('close', recusar);
+
+            abrirDialogo(alvo, { foco: '[data-confirmar-nao]' });
+        });
+    }
+
     /* ---------- Formulários ---------- */
 
     /** Lê um <form> como objeto, já sem espaços sobrando. */
@@ -305,6 +372,7 @@
         notificar,
         abrirDialogo,
         fecharDialogo,
+        confirmar,
         lerFormulario,
         validar,
         mascarar

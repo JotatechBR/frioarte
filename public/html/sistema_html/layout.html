@@ -49,7 +49,12 @@
         };
     </script>
 </head>
-<body class="app" data-secao="{{secao}}">
+<!--
+  `data-admin` vem montado do servidor, e não descoberto depois pelo JavaScript:
+  é ele que decide se o grupo "Administração" existe nesta página. Ver o comentário
+  em api/paginas_sistema.js.
+-->
+<body class="app" data-secao="{{secao}}" data-admin="{{admin}}">
 
 <!-- Ícones do sistema, definidos uma vez e usados por <use> ------------------>
 <svg class="apenas-leitor" aria-hidden="true" focusable="false">
@@ -73,6 +78,18 @@
         <g id="i-visitas" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
             <rect x="3.5" y="5" width="17" height="15.5" rx="3"/>
             <path d="M8 3.2v3.6M16 3.2v3.6M3.5 10.2h17"/>
+        </g>
+        <!--
+          Usuários não é "clientes de novo": aquele ícone é um grupo de pessoas,
+          este é um crachá — pessoa mais credencial. A diferença entre quem a
+          Frio Arte atende e quem tem a chave da ferramenta precisa ser legível
+          no menu, a 18px, sem ler o rótulo.
+        -->
+        <g id="i-usuarios" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4.5" width="18" height="15" rx="3.2"/>
+            <circle cx="9.2" cy="10.4" r="2.3"/>
+            <path d="M5.9 15.9c0-1.9 1.5-2.9 3.3-2.9s3.3 1 3.3 2.9"/>
+            <path d="M15.4 9.8h3.1M15.4 13h2.2"/>
         </g>
         <g id="i-busca" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
             <circle cx="11" cy="11" r="6.4"/>
@@ -139,6 +156,19 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-visitas"/></svg>
             Visitas
         </a>
+
+        <!--
+          Segundo grupo, e não mais um item na lista de cima: quem usa o sistema
+          o dia inteiro vive em Operação. Administração é onde se vai de vez em
+          quando, quando alguém entra ou sai da equipe — misturar as duas coisas
+          faria a tarefa rara disputar espaço com as quatro diárias.
+        -->
+        <p class="rotulo lateral__grupo lateral__grupo--adiante" data-so-admin>Administração</p>
+
+        <a class="lateral__item" href="/sistema/usuarios" data-nav="usuarios" data-so-admin>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-usuarios"/></svg>
+            Usuários
+        </a>
     </nav>
 
     <div class="lateral__pe">
@@ -148,6 +178,21 @@
                 <strong data-usuario-nome></strong>
                 <small data-usuario-funcao></small>
             </span>
+            <!--
+              Sair fica junto do perfil porque é sobre o perfil: quem está
+              dentro é a mesma informação que "deixar de estar".
+            -->
+            <button class="perfil__sair" type="button" data-sair
+                    title="Sair do sistema" aria-label="Sair do sistema" data-pressionavel>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M15 5V4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-1"
+                          fill="none" stroke="currentColor" stroke-width="1.6"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 12h10m0 0-3-3m3 3-3 3"
+                          fill="none" stroke="currentColor" stroke-width="1.6"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
         </div>
     </div>
 </aside>
@@ -212,6 +257,10 @@
     <a class="barra__item" href="/sistema/visitas" data-nav="visitas">
         <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-visitas"/></svg>
         <span>Visitas</span>
+    </a>
+    <a class="barra__item" href="/sistema/usuarios" data-nav="usuarios" data-so-admin>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-usuarios"/></svg>
+        <span>Usuários</span>
     </a>
 </nav>
 
@@ -555,6 +604,144 @@
     </form>
 </dialog>
 
+<!-- Cadastro de usuário ------------------------------------------------------
+     Folha curta: são cinco campos, e um painel de 44rem para cinco campos faz o
+     formulário parecer vazio. -->
+<dialog class="folha folha--curta" data-dialogo="usuario" aria-labelledby="titulo-forma-usuario">
+    <form class="folha__painel forma" data-forma="usuario" novalidate autocomplete="off">
+        <header class="folha__topo">
+            <div>
+                <p class="rotulo" data-forma-rotulo>Acesso</p>
+                <h2 class="folha__nome" id="titulo-forma-usuario" data-forma-titulo>Novo usuário</h2>
+            </div>
+            <button class="icone-botao" type="button" data-fechar aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fechar"/></svg>
+            </button>
+        </header>
+
+        <div class="folha__corpo">
+            <input type="hidden" name="id">
+
+            <p class="forma__nota" data-forma-nota></p>
+
+            <div class="forma__grade">
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Nome completo</span>
+                    <input class="campo-forma__entrada" name="nome" type="text" required
+                           maxlength="150" autocomplete="off" data-foco-inicial>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <!--
+                  O nome de acesso é o que a pessoa digita no login, e o banco
+                  não deixa repetir.
+
+                  Sem `pattern` restringindo a minúsculas e sem espaço: a coluna
+                  é `utf8mb4_0900_ai_ci`, então "Frio Arte", "frio arte" e
+                  "FRIO ARTE" são o mesmo login para quem entra. Forçar um
+                  formato aqui não protegeria ninguém de errar a digitação — só
+                  impediria de editar pela tela os acessos que já existem.
+                -->
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Nome de acesso</span>
+                    <input class="campo-forma__entrada" name="usuario" type="text" required
+                           minlength="3" maxlength="100" inputmode="text"
+                           autocapitalize="none" spellcheck="false" autocomplete="off"
+                           placeholder="joao.pedro">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <!--
+                  Campo livre com sugestões, e não `select`: a função também
+                  decide quem administra o sistema, então a lista precisa ser
+                  visível — mas fechá-la apagaria os cargos que já estão no
+                  banco no dia em que alguém cadastrar "Instalador".
+                -->
+                <label class="campo-forma">
+                    <span class="campo-forma__rotulo">Função</span>
+                    <input class="campo-forma__entrada" name="funcao" type="text" required
+                           maxlength="100" autocomplete="off" list="funcoes-usuario">
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+
+                <datalist id="funcoes-usuario">
+                    <option value="Administrador"></option>
+                    <option value="Técnico"></option>
+                    <option value="Atendimento"></option>
+                    <option value="Financeiro"></option>
+                    <option value="Auxiliar"></option>
+                </datalist>
+
+                <label class="campo-forma campo-forma--largo">
+                    <span class="campo-forma__rotulo">Senha</span>
+                    <input class="campo-forma__entrada" name="senha" type="password"
+                           minlength="8" maxlength="72" autocomplete="new-password"
+                           data-campo-senha>
+                    <span class="campo-forma__erro" data-campo-erro></span>
+                </label>
+            </div>
+
+            <p class="forma__secao">Situação</p>
+
+            <div class="alternador" role="radiogroup" aria-label="Situação do acesso">
+                <label class="alternador__opcao">
+                    <input type="radio" name="ativo" value="true" checked>
+                    <span>Pode entrar</span>
+                </label>
+                <label class="alternador__opcao">
+                    <input type="radio" name="ativo" value="false">
+                    <span>Sem acesso</span>
+                </label>
+            </div>
+
+            <p class="forma__aviso" data-forma-aviso hidden>
+                Desativar tira o acesso na hora, mas mantém o histórico de visitas
+                da pessoa intacto. É o caminho certo para quem saiu da equipe.
+            </p>
+        </div>
+
+        <footer class="folha__pe">
+            <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+            <button class="botao botao--primario" type="submit" data-pressionavel data-forma-enviar>
+                Criar usuário
+            </button>
+        </footer>
+    </form>
+</dialog>
+
+<!-- Confirmação ---------------------------------------------------------------
+     Uma folha, e não o `confirm()` do navegador: aquele é uma caixa cinza do
+     sistema operacional no meio de uma tela desenhada, não deixa explicar o que
+     acontece depois do "OK" e trava a página inteira enquanto está aberta. -->
+<dialog class="folha folha--curta" data-dialogo="confirmar" aria-labelledby="titulo-confirmar">
+    <div class="folha__painel">
+        <header class="folha__topo">
+            <div>
+                <p class="rotulo" data-confirmar-rotulo></p>
+                <h2 class="folha__nome" id="titulo-confirmar" data-confirmar-titulo></h2>
+            </div>
+            <button class="icone-botao" type="button" data-fechar aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-fechar"/></svg>
+            </button>
+        </header>
+
+        <div class="folha__corpo">
+            <p class="confirmar__texto" data-confirmar-texto></p>
+        </div>
+
+        <footer class="folha__pe">
+            <!-- Cancelar vem primeiro e recebe o foco: numa pergunta destrutiva,
+                 o Enter distraído tem que cair no lado que não apaga nada. -->
+            <button class="botao botao--secundario" type="button" data-fechar data-confirmar-nao>
+                Cancelar
+            </button>
+            <button class="botao botao--primario" type="button" data-confirmar-sim data-pressionavel>
+                Confirmar
+            </button>
+        </footer>
+    </div>
+</dialog>
+
 <!-- Detalhe da visita ------------------------------------------------------->
 <dialog class="folha folha--curta" data-dialogo="visita-detalhe" aria-labelledby="titulo-detalhe-visita">
     <div class="folha__painel">
@@ -577,11 +764,6 @@
 <script src="/js/shared/dom.js" defer></script>
 <script src="/js/shared/pressao.js" defer></script>
 <script src="/js/shared/revelar.js" defer></script>
-
-<script src="/js/sistema_js/data/clientes.mock.js" defer></script>
-<script src="/js/sistema_js/data/equipamentos.mock.js" defer></script>
-<script src="/js/sistema_js/data/visitas.mock.js" defer></script>
-<script src="/js/sistema_js/data/equipe.mock.js" defer></script>
 
 <!-- Primeiro de todos: é ele que vigia as falhas dos outros. -->
 <script src="/js/sistema_js/diario.js" defer></script>

@@ -1,13 +1,13 @@
 /**
  * Página de acesso.
  *
- * **Ainda não existe autenticação.** Não há banco, não há usuário, não há
- * sessão e não há endpoint. Esta página entrega a porta — o formulário, os
- * estados e as mensagens — e concentra em `realizarLogin()` o único ponto que
- * muda quando o backend chegar.
+ * O formulário conversa com `POST /api/acesso/login`. Dando certo, o servidor
+ * devolve um cookie de sessão assinado e a página troca de endereço; dando
+ * errado, a tela diz o que o servidor disse — nem mais, nem menos.
  *
- * Enquanto isso: nada é enviado, nada é guardado, nada é liberado. O envio real
- * é impedido sempre, e o que a tela responde é a verdade do momento.
+ * A senha não é guardada em lugar nenhum do navegador: ela existe no campo, vai
+ * no corpo do pedido e some. O que sobra depois do login é o cookie, que é
+ * `HttpOnly` e portanto invisível para todo JavaScript desta página.
  *
  * A validação é local, e não a do formulário de orçamento, por um motivo: aqui
  * cada mensagem de erro já existe no HTML, ligada ao campo por
@@ -16,8 +16,8 @@
  */
 
 const RECADOS = {
-    semAutenticacao: 'Autenticação ainda não configurada.',
-    semRecuperacao: 'Recuperação de senha ainda não configurada.'
+    semRede: 'Não foi possível falar com o servidor. Verifique a conexão e tente de novo.',
+    semRecuperacao: 'Para redefinir a senha, procure o responsável pelo sistema.'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     prepararOlho(forma);
     prepararEsqueci();
 
+    const botao = forma.querySelector('[type="submit"]');
+
     forma.addEventListener('submit', async (evento) => {
         // Enter no teclado chega aqui pelo mesmo caminho do clique no botão.
         evento.preventDefault();
@@ -46,8 +48,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const resultado = await realizarLogin();
-        anunciar(resultado.recado);
+        // O botão desligado é o que impede o duplo envio — bcrypt leva uns
+        // décimos de segundo, e nesse tempo dá para clicar três vezes.
+        ocupar(botao, true);
+        limparRecado();
+
+        try {
+            const resultado = await realizarLogin(forma);
+
+            if (resultado.autenticado) {
+                /*
+                 * `replace`, e não `href`: quem entrou não deve voltar para a
+                 * tela de login apertando "voltar" do navegador.
+                 */
+                window.location.replace(destino());
+                return;
+            }
+
+            anunciar(resultado.recado);
+        } finally {
+            ocupar(botao, false);
+        }
     });
 
     // O toque nos botões, como no resto do site.
@@ -59,18 +80,78 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * O único ponto que muda quando existir autenticação de verdade.
+ * O pedido de acesso.
  *
- * Hoje não lê o formulário, não chama a rede e não concede acesso nenhum: sem
- * banco não há a quem perguntar. Responde o que é fato — o acesso ainda não
- * está configurado — e a interface mostra isso.
- *
- * Quando o backend e o banco existirem, é aqui dentro que entra o
- * `POST /api/auth/login`, e nenhuma outra parte desta página precisa mudar.
+ * A mensagem de recusa vem do servidor de propósito: é lá que se decide o que
+ * pode ser dito sem entregar quem tem conta e quem não tem. A tela repete, não
+ * interpreta.
  */
-async function realizarLogin() {
-    // TODO: conectar à autenticação real quando o backend e o banco existirem.
-    return { autenticado: false, recado: RECADOS.semAutenticacao };
+async function realizarLogin(forma) {
+    const dados = new FormData(forma);
+
+    let resposta;
+
+    try {
+        resposta = await fetch('/api/acesso/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            // O servidor responde com `Set-Cookie`; sem isto o navegador o
+            // descartaria e o login "daria certo" sem liberar nada.
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                usuario: String(dados.get('usuario') || '').trim(),
+                senha: String(dados.get('senha') || '')
+            })
+        });
+    } catch (erro) {
+        // Servidor fora do ar, wi-fi caído, cabo solto: nada disso é senha
+        // errada, e dizer "usuário ou senha inválidos" mandaria a pessoa
+        // procurar o erro no lugar errado.
+        return { autenticado: false, recado: RECADOS.semRede };
+    }
+
+    let pacote = null;
+
+    try {
+        pacote = await resposta.json();
+    } catch (erro) {
+        /* Sem JSON na resposta; o status abaixo decide. */
+    }
+
+    if (resposta.ok && pacote && pacote.sucesso) {
+        return { autenticado: true, recado: '' };
+    }
+
+    return {
+        autenticado: false,
+        recado: (pacote && pacote.erro) || RECADOS.semRede
+    };
+}
+
+/**
+ * Para onde ir depois de entrar.
+ *
+ * Vem de `?destino=` — que o servidor põe quando barra alguém no meio do
+ * caminho. Só caminho interno do sistema passa: `//outro.site` é um endereço
+ * externo disfarçado de relativo, e seria um desvio aberto na tela de login.
+ */
+function destino() {
+    const pedido = new URLSearchParams(window.location.search).get('destino');
+
+    if (!pedido) return '/sistema';
+    if (!pedido.startsWith('/') || pedido.startsWith('//')) return '/sistema';
+    if (!pedido.startsWith('/sistema')) return '/sistema';
+
+    return pedido;
+}
+
+function ocupar(botao, ocupado) {
+    if (!botao) return;
+
+    botao.disabled = ocupado;
+
+    if (ocupado) botao.dataset.ocupado = 'true';
+    else delete botao.dataset.ocupado;
 }
 
 /** Só cobra o que é obrigatório e leva o foco ao primeiro campo em falta. */

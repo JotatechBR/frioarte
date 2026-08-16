@@ -6,7 +6,8 @@
     "scripts": {
         "start": "node server.js",
         "dev": "node --watch server.js",
-        "imagens": "node scripts/imagens.js"
+        "imagens": "node scripts/imagens.js",
+        "usuario": "node scripts/usuario.js"
     },
     "engines": {
         "node": ">=18"
