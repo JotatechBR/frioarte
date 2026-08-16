@@ -41,6 +41,49 @@ Em desenvolvimento a home é remontada a cada pedido, então basta salvar o HTML
 dar F5. Em produção (`NODE_ENV=production`) ela é montada uma vez e fica em
 memória.
 
+## Deploy na Vercel
+
+A Vercel não roda `npm start`: ela procura *funções*. Sem `vercel.json` e sem uma
+pasta `api/`, ela não encontra nenhuma, trata o repositório como site estático,
+não acha um `index.html` na raiz e devolve `404: NOT_FOUND` — o `server.js` nunca
+chega a ser executado.
+
+`vercel.json` resolve isso declarando o monólito como **uma função só**:
+
+```json
+"builds": [{ "src": "server.js", "use": "@vercel/node",
+             "config": { "includeFiles": ["public/**", "backend/**"] } }],
+"routes": [{ "src": "/(.*)", "dest": "server.js" }]
+```
+
+Três detalhes que não são decoração:
+
+- **Uma build, uma função.** Foi por isso que a pasta saiu de `api/` para
+  `backend/`: qualquer arquivo dentro de `api/` vira uma Serverless Function
+  separada no modo automático, e o Express deixava de ser um app só.
+- **`includeFiles`.** O empacotador segue `require`, mas não enxerga
+  `fs.readFileSync(path.join(HTML, 'layout.html'))`. Sem esta linha, as páginas
+  do sistema e o `statSync` do sitemap quebram em produção com o arquivo ausente.
+- **A rota `/(.*)` pega tudo**, inclusive `public/`. Quem serve estático continua
+  sendo o `express.static` do `server.js`, igual ao local — um caminho só, sem
+  regra de reescrita para sair de sincronia.
+
+O `server.js` atende os dois mundos porque exporta o app e só escuta quando é
+executado direto:
+
+```js
+if (require.main === module) iniciar();   // local: conecta ao banco e escuta
+module.exports = app;                      // Vercel: importa e chama como handler
+```
+
+**O banco precisa ser acessível pela internet.** `backend/db.js` lê `DB_HOST`,
+`DB_PORT`, `DB_USER` e `DB_PASSWORD` no momento do `require` e lança se faltar
+alguma — então elas têm que estar nas *Environment Variables* do projeto na
+Vercel, apontando para um MySQL público. Um endereço de rede local não é
+alcançável de lá. Vale o mesmo para `SESSAO_SEGREDO`: sem ele cada arranque a
+frio sorteia um segredo novo e derruba quem estava logado. Com HTTPS, ligue
+`SESSAO_SEGURA=true`.
+
 ## Estrutura
 
 ```text
