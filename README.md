@@ -47,7 +47,7 @@ memória.
 frio arte/
 ├── server.js                       Sobe o Express: estáticos, páginas, rotas, erros
 │
-├── api/
+├── backend/                        Todo o código de servidor
 │   ├── routes.js                   Registro central das rotas /api
 │   ├── pages.js                    Home com SEO injetado, robots.txt, sitemap, 404
 │   ├── middleware/
@@ -105,7 +105,7 @@ formato de cada registro — é o contrato que a API vai precisar devolver.
 ```text
 public/html/sistema_html/
 ├── layout.html          Chrome do sistema (lateral, cabeçalho, folhas) — uma vez só
-├── painel.html          Miolo de cada tela; api/paginas_sistema.js compõe layout + miolo
+├── painel.html          Miolo de cada tela; backend/paginas_sistema.js compõe layout + miolo
 ├── clientes.html · cliente.html
 ├── equipamentos.html · equipamento.html
 ├── visitas.html
@@ -135,15 +135,15 @@ public/js/sistema_js/
 
 Não há coluna de papel na tabela: quem manda é quem tem função de administrador
 (`Administrador`, `Dono`, `Diretor`, `Gestor` e variantes — a lista está em
-`api/middleware/exigirAdministrador.js`, comparada sem acento e sem caixa).
+`backend/middleware/exigirAdministrador.js`, comparada sem acento e sem caixa).
 
 A regra vale em três camadas, e as três são independentes de propósito:
 
-| Camada                            | O que faz                                                |
-| --------------------------------- | -------------------------------------------------------- |
-| `api/paginas_sistema.js`          | Desvia para `/sistema` quem digitar a rota sem ser admin  |
-| `api/rota_usuarios/rota_usuarios.js` | 403 em criar, editar, ativar e excluir                 |
-| `data-admin` no `<body>` + CSS    | O menu "Administração" não chega ao navegador dos outros  |
+| Camada                                   | O que faz                                                |
+| ---------------------------------------- | -------------------------------------------------------- |
+| `backend/paginas_sistema.js`             | Desvia para `/sistema` quem digitar a rota sem ser admin  |
+| `backend/rota_usuarios/rota_usuarios.js` | 403 em criar, editar, ativar e excluir                    |
+| `data-admin` no `<body>` + CSS           | O menu "Administração" não chega ao navegador dos outros  |
 
 `GET /api/usuarios` continua aberto a qualquer sessão: é ele que preenche o
 campo "Técnico" do agendamento de visita, e fechá-lo quebraria a agenda de todo
@@ -199,12 +199,12 @@ interface manda os acontecimentos dela para o servidor, então **o que o técnic
 faz no celular aparece nesta janela** — no console do aparelho ninguém está
 olhando.
 
-| Peça                                  | O que faz                                        |
-| ------------------------------------- | ------------------------------------------------ |
-| `api/shared/diario.js`                | Formata e imprime. Nunca lança exceção            |
-| `api/middleware/registroPedidos.js`   | Cada pedido HTTP: rota, status, tempo, de onde     |
-| `api/rota_sistema/rota_sistema.js`    | `POST /api/sistema/registros` — recebe do navegador |
-| `public/js/sistema_js/diario.js`      | Registra na tela e envia em lote a cada 1,2s      |
+| Peça                                    | O que faz                                           |
+| --------------------------------------- | --------------------------------------------------- |
+| `backend/shared/diario.js`              | Formata e imprime. Nunca lança exceção              |
+| `backend/middleware/registroPedidos.js` | Cada pedido HTTP: rota, status, tempo, de onde       |
+| `backend/rota_sistema/rota_sistema.js`  | `POST /api/sistema/registros` — recebe do navegador  |
+| `public/js/sistema_js/diario.js`        | Registra na tela e envia em lote a cada 1,2s        |
 
 Detalhes que valem saber:
 
@@ -235,7 +235,7 @@ frioarte.html → main.js → api.js → GET /api/frioarte
                                       JSON → módulos secao_* → tela
 ```
 
-**Para mudar qualquer texto do site, edite `api/shared/frioarte.dados.js`.**
+**Para mudar qualquer texto do site, edite `backend/shared/frioarte.dados.js`.**
 Nada de conteúdo solto no HTML: o HTML só tem estrutura e ganchos `data-campo` /
 `data-lista` que os módulos preenchem.
 
@@ -343,7 +343,7 @@ grade: {
 }
 ```
 
-`api/shared/funcionamento.js` calcula o resto no relógio de São Paulo (não no do
+`backend/shared/funcionamento.js` calcula o resto no relógio de São Paulo (não no do
 servidor): `situacao`, `aberto`, o `detalhe` que a tela mostra ("Fecha às 18:00",
 "Abre seg. às 09:00") e o `horarios` no formato schema.org.
 
@@ -351,7 +351,7 @@ Para mudar o horário, mexa só na grade.
 
 ## SEO
 
-`api/shared/seo.js` monta canonical, Open Graph, Twitter Card e o JSON-LD
+`backend/shared/seo.js` monta canonical, Open Graph, Twitter Card e o JSON-LD
 `HVACBusiness` a partir dos dados, e `pages.js` injeta tudo no lugar do
 marcador `<!-- SEO -->` da home. É feito no servidor porque quem lê essas tags —
 robô de busca, prévia de link do WhatsApp — em geral não executa JavaScript.
@@ -389,7 +389,7 @@ O formulário **não envia nada para o servidor e não armazena dado nenhum**. E
 monta uma mensagem organizada (nome, serviço, bairro, detalhes) e abre o WhatsApp
 da empresa com o texto já escrito, para o pedido chegar onde a Frio Arte atende.
 
-Se um dia for preciso guardar os pedidos, o caminho é criar `api/rota_orcamentos/`
+Se um dia for preciso guardar os pedidos, o caminho é criar `backend/rota_orcamentos/`
 com repository e uma tabela — a estrutura do projeto já comporta.
 
 ## Pendências

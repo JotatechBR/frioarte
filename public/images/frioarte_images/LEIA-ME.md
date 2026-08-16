@@ -25,7 +25,7 @@ foto nova até aparece, mas sai só em JPG — mais pesada do que precisava.
    higienizacao-evaporadora.jpg
    ```
 
-2. Abra `api/shared/frioarte.dados.js` e preencha o projeto correspondente:
+2. Abra `backend/shared/frioarte.dados.js` e preencha o projeto correspondente:
 
    ```js
    {

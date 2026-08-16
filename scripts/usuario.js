@@ -2,8 +2,8 @@ require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
 
-const { pool, NOME_BANCO } = require('../api/db');
-const { ehAdministrador } = require('../api/middleware/exigirAdministrador');
+const { pool, NOME_BANCO } = require('../backend/db');
+const { ehAdministrador } = require('../backend/middleware/exigirAdministrador');
 
 /**
  * Cadastro de usuário pela linha de comando.

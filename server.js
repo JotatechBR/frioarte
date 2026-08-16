@@ -4,12 +4,12 @@ const os = require('os');
 const path = require('path');
 const express = require('express');
 
-const registrarRotas = require('./api/routes');
-const { registrarPaginas, registrarPaginaNaoEncontrada } = require('./api/pages');
-const { naoEncontrado, tratarErro } = require('./api/middleware/tratamentoErros');
-const { registrarPedidos } = require('./api/middleware/registroPedidos');
-const diario = require('./api/shared/diario');
-const { pool, testarConexao, NOME_BANCO } = require('./api/db');
+const registrarRotas = require('./backend/routes');
+const { registrarPaginas, registrarPaginaNaoEncontrada } = require('./backend/pages');
+const { naoEncontrado, tratarErro } = require('./backend/middleware/tratamentoErros');
+const { registrarPedidos } = require('./backend/middleware/registroPedidos');
+const diario = require('./backend/shared/diario');
+const { pool, testarConexao, NOME_BANCO } = require('./backend/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
