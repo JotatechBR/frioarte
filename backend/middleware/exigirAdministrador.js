@@ -18,6 +18,7 @@ const diario = require('../shared/diario');
  */
 
 const FUNCOES_DE_MANDO = [
+    'master',
     'administrador',
     'administradora',
     'admin',
